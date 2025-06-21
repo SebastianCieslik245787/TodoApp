@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="zero_dp">0dp</dimen>
+    <dimen name="padding_inside_input">30sp</dimen>
+    <dimen name="margin_top_input">40dp</dimen>
+    <dimen name="text_size_input">18sp</dimen>
+    <dimen name="height_input">50dp</dimen>
+    <dimen name="width_perc_input">0.9</dimen>
+    <dimen name="height_input_label">30dp</dimen>
+    <dimen name="margin_start_input_label">50dp</dimen>
+    <dimen name="margin_top_input_label">-15dp</dimen>
+    <dimen name="padding_input_label">5dp</dimen>
+    <dimen name="text_size_input_label">18sp</dimen>
+    <dimen name="height_button">50dp</dimen>
+    <dimen name="text_size_button">18sp</dimen>
+</resources>

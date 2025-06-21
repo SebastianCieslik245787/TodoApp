@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="add_task_input">
+        <item name="android:layout_width">@dimen/zero_dp</item>
+        <item name="android:layout_height">@dimen/height_input</item>
+        <item name="android:layout_marginTop">@dimen/margin_top_input</item>
+        <item name="android:paddingStart">@dimen/padding_inside_input</item>
+        <item name="android:paddingEnd">@dimen/padding_inside_input</item>
+        <item name="android:textSize">@dimen/text_size_input</item>
+        <item name="android:textColor">@color/input_text_color</item>
+        <item name="android:background">@drawable/text_input_background</item>
+        <item name="layout_constraintWidth_percent">@dimen/width_perc_input</item>
+    </style>
+    <style name="add_task_input_label">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/height_input_label</item>
+        <item name="android:layout_marginTop">@dimen/margin_top_input_label</item>
+        <item name="android:layout_marginStart">@dimen/margin_start_input_label</item>
+        <item name="android:background">@color/add_task_background</item>
+        <item name="android:paddingStart">@dimen/padding_input_label</item>
+        <item name="android:paddingEnd">@dimen/padding_input_label</item>
+        <item name="android:textColor">@color/stroke</item>
+        <item name="android:textSize">@dimen/text_size_input_label</item>
+    </style>
+    <style name="add_task_button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/height_button</item>
+        <item name="android:background">@drawable/notifications_button</item>
+        <item name="android:textColor">@color/background</item>
+        <item name="android:textSize">@dimen/text_size_button</item>
+    </style>
+</resources>

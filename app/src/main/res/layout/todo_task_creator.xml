@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/add_task_background">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="50dp"
+        android:paddingBottom="50dp">
+
+        <TextView
+            android:id="@+id/addTaskLabel"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="@string/add_task_label"
+            android:textColor="@color/stroke"
+            android:textSize="40sp"
+            app:layout_constraintBottom_toTopOf="@id/addTitleInput"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintWidth_percent="0.9" />
+
+        <EditText
+            android:id="@+id/addTitleInput"
+            style="@style/add_task_input"
+            android:background="@drawable/text_input_background"
+            android:hint="@string/add_title_input_hint"
+            android:inputType="text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/addTaskLabel"
+            tools:ignore="LabelFor" />
+
+        <TextView
+            android:id="@+id/addTitleLabel"
+            style="@style/add_task_input_label"
+            android:text="@string/add_title_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/addTitleInput" />
+
+        <ScrollView
+            android:id="@+id/addDescriptionInputSV"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/text_input_background"
+            android:padding="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/addTitleInput"
+            app:layout_constraintWidth_percent="0.9">
+
+            <EditText
+                android:id="@+id/addDescriptionInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:gravity="top"
+                android:hint="@string/add_description_input_hint"
+                android:inputType="textMultiLine"
+                android:textColor="@color/input_text_color"
+                android:textSize="16sp"
+                tools:ignore="LabelFor" />
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/addDescriptionLabel"
+            style="@style/add_task_input_label"
+            android:text="@string/add_description_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/addDescriptionInputSV" />
+
+        <TextView
+            android:id="@+id/addDateInput"
+            style="@style/add_task_input"
+            android:background="@drawable/text_input_background"
+            android:gravity="center|left"
+            android:text="@string/add_date_input_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/addDescriptionInputSV" />
+
+        <TextView
+            android:id="@+id/addDateLabel"
+            style="@style/add_task_input_label"
+            android:text="@string/add_date_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/addDateInput" />
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/calendar"
+            app:layout_constraintEnd_toEndOf="@id/addDateInput"
+            app:layout_constraintTop_toTopOf="@id/addDateInput" />
+
+        <TextView
+            android:id="@+id/addTimeInput"
+            style="@style/add_task_input"
+            android:background="@drawable/text_input_background"
+            android:gravity="center|left"
+            android:text="@string/add_time_input_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/addDateInput" />
+
+        <TextView
+            android:id="@+id/addTimeLabel"
+            style="@style/add_task_input_label"
+            android:text="@string/add_time_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/addTimeInput" />
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/clock"
+            app:layout_constraintEnd_toEndOf="@id/addTimeInput"
+            app:layout_constraintTop_toTopOf="@id/addTimeInput" />
+
+        <TextView
+            android:id="@+id/notificationsLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="Powiadomienia (opcjonalne)"
+            android:textColor="@color/stroke"
+            android:textSize="22sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/addTimeInput"
+            app:layout_constraintWidth_percent="0.90" />
+
+        <TextView
+            android:id="@+id/notificationButton"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="20dp"
+            android:gravity="center|right"
+            android:paddingStart="60dp"
+            android:paddingRight="15dp"
+            android:text="Wyłącz"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/notificationsLabel"
+            style="@style/add_task_button"
+            />
+
+        <ImageView
+            android:id="@+id/notificationButtonIcon"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="13dp"
+            android:src="@drawable/no_notification"
+            app:layout_constraintStart_toStartOf="@id/notificationButton"
+            app:layout_constraintTop_toTopOf="@id/notificationButton" />
+
+        <TextView
+            android:id="@+id/addNotificationDateInput"
+            style="@style/add_task_input"
+            android:background="@drawable/text_input_background"
+            android:gravity="center|left"
+            android:text="@string/add_date_input_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/notificationButton" />
+
+        <TextView
+            android:id="@+id/addNotificationDateLabel"
+            style="@style/add_task_input_label"
+            android:text="@string/add_date_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/addNotificationDateInput" />
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/calendar"
+            app:layout_constraintEnd_toEndOf="@id/addNotificationDateInput"
+            app:layout_constraintTop_toTopOf="@id/addNotificationDateInput" />
+
+        <TextView
+            android:id="@+id/addNotificationTimeInput"
+            style="@style/add_task_input"
+            android:background="@drawable/text_input_background"
+            android:gravity="center|left"
+            android:text="@string/add_time_input_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/addNotificationDateInput" />
+
+        <TextView
+            android:id="@+id/addNotificationTimeLabel"
+            style="@style/add_task_input_label"
+            android:text="@string/add_time_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/addNotificationTimeInput" />
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/clock"
+            app:layout_constraintEnd_toEndOf="@id/addNotificationTimeInput"
+            app:layout_constraintTop_toTopOf="@id/addNotificationTimeInput" />
+
+        <TextView
+            android:id="@+id/addTaskButton"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="30dp"
+            android:gravity="center"
+            android:paddingStart="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/add_task_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/addNotificationTimeInput"
+            style="@style/add_task_button"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
