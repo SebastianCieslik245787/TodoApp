@@ -8,6 +8,7 @@
         <item name="android:paddingEnd">@dimen/padding_inside_input</item>
         <item name="android:textSize">@dimen/text_size_input</item>
         <item name="android:textColor">@color/input_text_color</item>
+        <item name="android:textColorHint">@color/input_text_color</item>
         <item name="android:background">@drawable/text_input_background</item>
         <item name="layout_constraintWidth_percent">@dimen/width_perc_input</item>
     </style>
@@ -26,7 +27,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">@dimen/height_button</item>
         <item name="android:background">@drawable/notifications_button</item>
-        <item name="android:textColor">@color/background</item>
+        <item name="android:textColor">@color/add_task_background</item>
         <item name="android:textSize">@dimen/text_size_button</item>
     </style>
 </resources>
