@@ -2,6 +2,7 @@ package com.example.todoapp
 
 import android.content.ContentValues
 import android.database.Cursor
+import android.util.Log
 
 class DatabaseManager(private val dbHelper: DatabaseHelper) {
     fun insertTask(task: Task): Long {
@@ -85,6 +86,8 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
 
         val selection = if (selectionParts.isNotEmpty()) selectionParts.joinToString(" AND ") else null
         val orderBy = if (sorted) "${DatabaseHelper.COLUMN_CREATE_DATE} ASC, ${DatabaseHelper.COLUMN_CREATE_TIME} ASC" else null
+
+        Log.d("XD", "XD")
 
         return queryTasks(selection, if (selectionArgs.isNotEmpty()) selectionArgs.toTypedArray() else null, orderBy)
     }

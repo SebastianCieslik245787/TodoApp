@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/task_item"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp"
+    android:layout_marginStart="10dp"
+    android:padding="5dp"
+    android:layout_marginEnd="10dp"
+    android:elevation="2dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/taskItemTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:padding="10dp"
+        android:paddingEnd="50dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/taskItemCreatedDateAndTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/taskItemTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        android:paddingStart="20dp"
+        android:paddingBottom="10dp"
+        android:textSize="15sp"
+        />
+
+    <ImageView
+        android:id="@+id/taskItemNotificationIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/notification"
+        app:layout_constraintTop_toBottomOf="@id/taskItemTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        />
+
+    <ImageView
+        android:id="@+id/taskItemAttachmentIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/attach_icon"
+        app:layout_constraintTop_toBottomOf="@id/taskItemTitle"
+        app:layout_constraintEnd_toStartOf="@id/taskItemNotificationIcon"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
