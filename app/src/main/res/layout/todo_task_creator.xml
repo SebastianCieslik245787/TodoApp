@@ -79,71 +79,47 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/addDescriptionInputSV" />
 
-        <TextView
-            android:id="@+id/addDateInput"
-            style="@style/add_task_input"
-            android:background="@drawable/text_input_background"
-            android:gravity="center|left"
-            android:text="@string/add_date_input_hint"
-            app:layout_constraintEnd_toEndOf="parent"
+        <Spinner
+            android:id="@+id/selectCategoryInput"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/margin_top_input"
+            app:layout_constraintTop_toBottomOf="@id/addDescriptionInputSV"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/addDescriptionInputSV" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.9"
+            android:background="@drawable/text_input_background"
+            style="@style/add_task_input"
+            />
 
         <TextView
-            android:id="@+id/addDateLabel"
+            android:id="@+id/selectCategoryLabel"
             style="@style/add_task_input_label"
-            android:text="@string/add_date_label"
+            android:text="@string/select_category_label"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/addDateInput" />
+            app:layout_constraintTop_toTopOf="@id/selectCategoryInput" />
 
         <ImageView
-            android:id="@+id/calendar"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="15dp"
-            android:src="@drawable/calendar"
-            app:layout_constraintEnd_toEndOf="@id/addDateInput"
-            app:layout_constraintTop_toTopOf="@id/addDateInput" />
-
-        <TextView
-            android:id="@+id/addTimeInput"
-            style="@style/add_task_input"
-            android:background="@drawable/text_input_background"
-            android:gravity="center|left"
-            android:text="@string/add_time_input_hint"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/addDateInput" />
-
-        <TextView
-            android:id="@+id/addTimeLabel"
-            style="@style/add_task_input_label"
-            android:text="@string/add_time_label"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/addTimeInput" />
-
-        <ImageView
-            android:id="@+id/clock"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="15dp"
-            android:src="@drawable/clock"
-            app:layout_constraintEnd_toEndOf="@id/addTimeInput"
-            app:layout_constraintTop_toTopOf="@id/addTimeInput" />
+            android:id="@+id/selectCategoryInputIcon"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="13dp"
+            android:src="@drawable/arrow_down"
+            app:layout_constraintEnd_toEndOf="@id/selectCategoryInput"
+            app:layout_constraintTop_toTopOf="@id/selectCategoryInput" />
 
         <TextView
             android:id="@+id/notificationsLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:text="Powiadomienia (opcjonalne)"
+            android:text="@string/notification_label"
             android:textColor="@color/stroke"
             android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/addTimeInput"
+            app:layout_constraintTop_toBottomOf="@id/addAttachmentButton"
             app:layout_constraintWidth_percent="0.90" />
 
         <TextView
@@ -224,17 +200,68 @@
             app:layout_constraintTop_toTopOf="@id/addNotificationTimeInput" />
 
         <TextView
+            android:id="@+id/attachmentLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="@string/attachment_label"
+            android:textColor="@color/stroke"
+            android:textSize="22sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/selectCategoryInput"
+            app:layout_constraintWidth_percent="0.90" />
+
+        <LinearLayout
+            android:id="@+id/attachmentField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintWidth_percent="0.9"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/attachmentLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/addAttachmentButton"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="20dp"
+            android:gravity="center|right"
+            android:paddingStart="60dp"
+            android:paddingRight="15dp"
+            android:text="@string/add_attachment_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/attachmentField"
+            style="@style/add_task_button"
+            />
+
+        <ImageView
+            android:id="@+id/addAttachmentButtonIcon"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="13dp"
+            android:src="@drawable/add_task_icon"
+            app:layout_constraintStart_toStartOf="@id/addAttachmentButton"
+            app:layout_constraintTop_toTopOf="@id/addAttachmentButton" />
+
+
+        <TextView
             android:id="@+id/addTaskButton"
             android:layout_marginTop="40dp"
-            android:layout_marginEnd="30dp"
             android:gravity="center"
-            android:paddingStart="20dp"
-            android:paddingRight="20dp"
+            android:paddingStart="30dp"
+            android:paddingRight="30dp"
             android:text="@string/add_task_button"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/addNotificationTimeInput"
             style="@style/add_task_button"
             />
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,0 +1,57 @@
+package com.example.todoapp
+
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
+
+class DatabaseHelper(context: Context) :
+    SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
+    companion object {
+        private const val DATABASE_NAME = "task_manager.db"
+        private const val DATABASE_VERSION = 1
+
+        const val TABLE_TASKS = "tasks"
+        const val COLUMN_ID = "id"
+        const val COLUMN_TITLE = "title"
+        const val COLUMN_DESCRIPTION = "description"
+        const val COLUMN_CREATE_DATE = "create_date"
+        const val COLUMN_CREATE_TIME = "create_time"
+        const val COLUMN_END_DATE = "end_date"
+        const val COLUMN_END_TIME = "end_time"
+        const val COLUMN_CATEGORY = "category"
+        const val COLUMN_NOTIFICATION_DATE = "notification_date"
+        const val COLUMN_NOTIFICATION_TIME = "notification_time"
+        const val COLUMN_HAS_ATTACHMENTS = "has_attachments"
+        const val COLUMN_IS_DONE = "is_done"
+    }
+
+    override fun onCreate(db: SQLiteDatabase?) {
+        val createTable = """
+            CREATE TABLE $TABLE_TASKS (
+                $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_TITLE TEXT NOT NULL,
+                $COLUMN_DESCRIPTION TEXT NOT NULL,
+                $COLUMN_CREATE_DATE TEXT NOT NULL,
+                $COLUMN_CREATE_TIME TEXT NOT NULL,
+                $COLUMN_END_DATE TEXT,
+                $COLUMN_END_TIME TEXT,
+                $COLUMN_CATEGORY TEXT NOT NULL,
+                $COLUMN_NOTIFICATION_DATE TEXT,
+                $COLUMN_NOTIFICATION_TIME TEXT,
+                $COLUMN_HAS_ATTACHMENTS INTEGER DEFAULT 0,
+                $COLUMN_IS_DONE INTEGER DEFAULT 0
+            )
+        """.trimIndent()
+        db?.execSQL(createTable)
+    }
+
+    override fun onUpgrade(
+        db: SQLiteDatabase?,
+        oldVersion: Int,
+        newVersion: Int
+    ) {
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_TASKS")
+        onCreate(db)
+    }
+}

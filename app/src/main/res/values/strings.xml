@@ -10,4 +10,16 @@
     <string name="add_description_input_hint">Wpisz opis...</string>
     <string name="add_date_input_hint">Wybierz date...</string>
     <string name="add_task_button">Dodaj zadanie</string>
+    <string name="notification_label">Powiadomienia (opcjonalne)</string>
+    <string name="attachment_label">Załączniki (opcjonalnie)</string>
+    <string name="add_attachment_button">Dodaj załącznik</string>
+    <string name="select_category_label">Kategoria</string>
+    <string-array name="category_array">
+        <item>Wybierz kategorie</item>
+        <item>Praca</item>
+        <item>Spotkanie</item>
+        <item>Zakupy</item>
+        <item>Wyjazd</item>
+        <item>Zajęcia</item>
+    </string-array>
 </resources>
