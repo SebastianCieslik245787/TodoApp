@@ -3,6 +3,7 @@ package com.example.todoapp
 import android.content.ContentValues
 import android.database.Cursor
 import android.util.Log
+import android.widget.Toast
 
 class DatabaseManager(private val dbHelper: DatabaseHelper) {
     fun insertTask(task: Task): Long {
@@ -14,6 +15,8 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
             put(DatabaseHelper.COLUMN_CREATE_TIME, task.createTime)
             put(DatabaseHelper.COLUMN_END_DATE, task.endDate)
             put(DatabaseHelper.COLUMN_END_TIME, task.endTime)
+            put(DatabaseHelper.COLUMN_PLANED_DATE, task.planedDate)
+            put(DatabaseHelper.COLUMN_PLANED_TIME, task.planedTime)
             put(DatabaseHelper.COLUMN_CATEGORY, task.category)
             put(DatabaseHelper.COLUMN_NOTIFICATION_DATE, task.notificationDate)
             put(DatabaseHelper.COLUMN_NOTIFICATION_TIME, task.notificationTime)
@@ -31,6 +34,8 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
             createTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CREATE_TIME)),
             endDate = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_END_DATE)),
             endTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_END_TIME)),
+            planedDate = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PLANED_DATE)),
+            planedTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PLANED_TIME)),
             category = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CATEGORY)),
             notificationDate = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NOTIFICATION_DATE)),
             notificationTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NOTIFICATION_TIME)),
@@ -85,7 +90,7 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
         }
 
         val selection = if (selectionParts.isNotEmpty()) selectionParts.joinToString(" AND ") else null
-        val orderBy = if (sorted) "${DatabaseHelper.COLUMN_CREATE_DATE} ASC, ${DatabaseHelper.COLUMN_CREATE_TIME} ASC" else null
+        val orderBy = if (sorted) "${DatabaseHelper.COLUMN_PLANED_DATE} ASC, ${DatabaseHelper.COLUMN_PLANED_TIME} ASC" else null
 
         Log.d("XD", "XD")
 
@@ -102,6 +107,8 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
             put(DatabaseHelper.COLUMN_CREATE_TIME, task.createTime)
             put(DatabaseHelper.COLUMN_END_DATE, task.endDate)
             put(DatabaseHelper.COLUMN_END_TIME, task.endTime)
+            put(DatabaseHelper.COLUMN_PLANED_DATE, task.planedDate)
+            put(DatabaseHelper.COLUMN_PLANED_TIME, task.planedTime)
             put(DatabaseHelper.COLUMN_CATEGORY, task.category)
             put(DatabaseHelper.COLUMN_NOTIFICATION_DATE, task.notificationDate)
             put(DatabaseHelper.COLUMN_NOTIFICATION_TIME, task.notificationTime)

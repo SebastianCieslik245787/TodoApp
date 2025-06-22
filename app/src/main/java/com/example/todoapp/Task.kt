@@ -6,11 +6,13 @@ data class Task(
     val description : String,
     val createDate : String,
     val createTime : String,
-    val endDate : String?,
-    val endTime : String?,
+    val planedDate : String,
+    val planedTime : String,
+    var endDate : String?,
+    var endTime : String?,
     val category: String,
     val notificationDate : String?,
     val notificationTime : String?,
     val hasAttachments : Boolean,
-    val isDone : Boolean
+    var isDone : Boolean
 )

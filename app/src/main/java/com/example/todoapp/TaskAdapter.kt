@@ -1,4 +1,6 @@
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,6 +9,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
 import com.example.todoapp.Task
+import androidx.core.content.edit
+import com.example.todoapp.ShowTask
 
 class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
@@ -26,7 +30,7 @@ class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdap
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = tasks[position]
         holder.title.text = task.title
-        holder.createdDate.text = "Data utworzenia: ${task.createDate}"
+        holder.createdDate.text = "${task.planedDate} ${task.planedTime}"
 
         holder.notificationIcon.visibility = if (!task.notificationDate.isNullOrBlank() || !task.notificationTime.isNullOrBlank()) {
             View.VISIBLE
@@ -35,6 +39,15 @@ class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdap
         }
 
         holder.attachmentIcon.visibility = if (task.hasAttachments) View.VISIBLE else View.GONE
+
+        holder.itemView.setOnClickListener {
+            val context = holder.itemView.context
+            val sharedPref = context.getSharedPreferences("task_prefs", Context.MODE_PRIVATE)
+            sharedPref.edit { putInt("selected_task_id", task.id) }
+            val intent = Intent(context, ShowTask::class.java)
+
+            context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int = tasks.size

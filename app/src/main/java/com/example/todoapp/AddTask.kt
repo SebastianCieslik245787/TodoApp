@@ -1,6 +1,7 @@
 package com.example.todoapp
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
@@ -25,15 +26,23 @@ class AddTask : AppCompatActivity() {
     private lateinit var descriptionInput: EditText
     private lateinit var timeNotificationInput: ImageView
     private lateinit var dateNotificationInput: ImageView
+    private lateinit var planedTimeInput: ImageView
+    private lateinit var planedDateInput: ImageView
     private lateinit var notificationsButton: TextView
     private lateinit var addTaskButton: TextView
     private lateinit var notificationDateField: TextView
     private lateinit var notificationTimeField: TextView
+    private lateinit var planedDateField: TextView
+    private lateinit var planedTimeField: TextView
     private lateinit var addAttachmentButton: TextView
     private lateinit var attachmentField: LinearLayout
+    private lateinit var backButton : ImageView
 
     private var notificationTime : String = ""
     private var notificationDate : String = ""
+
+    private var planedTime : String = ""
+    private var planedDate : String = ""
 
     private lateinit var categorySpinner: Spinner
     private var category : String = "Wybierz kategorię..."
@@ -52,6 +61,8 @@ class AddTask : AppCompatActivity() {
             category = it.getString("category", "Wybierz kategorię...")
             notificationDate = it.getString("notificationDate", "")
             notificationTime = it.getString("notificationTime", "")
+            planedDate = it.getString("planedDate", "")
+            planedTime = it.getString("planedTime", "")
         }
 
         setup()
@@ -64,6 +75,8 @@ class AddTask : AppCompatActivity() {
         outState.putString("description", descriptionInput.text.toString())
         outState.putString("notificationDate", notificationDate)
         outState.putString("notificationTime", notificationTime)
+        outState.putString("planedDate", planedDate)
+        outState.putString("planedTime", planedTime)
     }
 
     private fun setup() {
@@ -71,17 +84,26 @@ class AddTask : AppCompatActivity() {
         descriptionInput = findViewById(R.id.addDescriptionInput)
         dateNotificationInput = findViewById(R.id.notificationCalendar)
         timeNotificationInput = findViewById(R.id.notificationClock)
+        planedDateInput = findViewById(R.id.planedCalendar)
+        planedTimeInput = findViewById(R.id.planedClock)
         notificationsButton = findViewById(R.id.notificationButton)
         addTaskButton = findViewById(R.id.addTaskButton)
         notificationDateField = findViewById(R.id.addNotificationDateInput)
         notificationTimeField = findViewById(R.id.addNotificationTimeInput)
+        planedDateField = findViewById(R.id.addPlanedDateInput)
+        planedTimeField = findViewById(R.id.addPlanedTimeInput)
         addAttachmentButton = findViewById(R.id.addAttachmentButton)
         attachmentField = findViewById(R.id.attachmentField)
         categorySpinner = findViewById(R.id.selectCategoryInput)
         setSpinner()
+        backButton = findViewById(R.id.backButton)
+        backButton.setOnClickListener { showDiscardChangesDialog() }
+
 
         if(!notificationTime.isBlank()) notificationTimeField.text = notificationTime
         if(!notificationDate.isBlank()) notificationDateField.text = notificationDate
+        if(!planedTime.isBlank()) planedTimeField.text = planedTime
+        if(!planedDate.isBlank()) planedDateField.text = planedDate
 
         addTaskButton.setOnClickListener {
             val title: String = titleInput.text.toString()
@@ -107,6 +129,8 @@ class AddTask : AppCompatActivity() {
                 createTime = currentTime,
                 endDate = null,
                 endTime = null,
+                planedDate = planedDate,
+                planedTime = planedTime,
                 category = "Ogólna",
                 notificationDate = if (notificationDate.isNotEmpty()) notificationDate else null,
                 notificationTime = if (notificationTime.isNotEmpty()) notificationTime else null,
@@ -125,8 +149,10 @@ class AddTask : AppCompatActivity() {
 
         }
 
-        dateNotificationInput.setOnClickListener { showDatePickerDialog() }
-        timeNotificationInput.setOnClickListener { showTimePickerDialog() }
+        dateNotificationInput.setOnClickListener { showDatePickerDialog(true) }
+        timeNotificationInput.setOnClickListener { showTimePickerDialog(true) }
+        planedDateInput.setOnClickListener { showDatePickerDialog(false) }
+        planedTimeInput.setOnClickListener { showTimePickerDialog(false) }
     }
 
     private fun validateText(text: String, message: String): Boolean {
@@ -138,9 +164,23 @@ class AddTask : AppCompatActivity() {
     }
 
     private fun validateDate(): Boolean {
+        if (planedDate == "") {
+            Toast.makeText(this, "Nie wybrałeś daty!", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if(planedTime == ""){
+            Toast.makeText(this, "Nie wybrałeś godziny!", Toast.LENGTH_SHORT).show()
+            return false
+        }
         try {
-            val formatter = DateTimeFormatter.ofPattern("d/M/yyyy HH:mm")
+            val formatter = DateTimeFormatter.ofPattern("d/M/yyyy H:mm")
+            val selectedDateTime = LocalDateTime.parse("$planedDate $planedTime", formatter)
             val now = LocalDateTime.now()
+
+            if (selectedDateTime.isBefore(now)) {
+                Toast.makeText(this, "Data musi być z przyszłości!", Toast.LENGTH_SHORT).show()
+                return false
+            }
 
             if (notificationDate.isNotEmpty()) {
                 if (notificationTime.isEmpty()) {
@@ -148,13 +188,20 @@ class AddTask : AppCompatActivity() {
                     return false
                 }
 
-                val notificationDateTime = LocalDateTime.parse("$notificationDate $notificationTime", formatter)
+                val notificationDateTime =
+                    LocalDateTime.parse("$notificationDate $notificationTime", formatter)
 
                 if (notificationDateTime.isBefore(now)) {
                     Toast.makeText(this, "Powiadomienie nie może być w przeszłości!", Toast.LENGTH_SHORT).show()
                     return false
                 }
-            } else {
+
+                if (notificationDateTime.isAfter(selectedDateTime)) {
+                    Toast.makeText(this, "Powiadomienie nie może być później niż zaplanowana data!", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+            }
+            else{
                 if (notificationTime.isNotEmpty()) {
                     Toast.makeText(this, "Nie wybrano daty powiadomienia!", Toast.LENGTH_SHORT).show()
                     return false
@@ -169,7 +216,7 @@ class AddTask : AppCompatActivity() {
         return true
     }
 
-    private fun showDatePickerDialog() {
+    private fun showDatePickerDialog(isNotification : Boolean) {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)
@@ -179,8 +226,14 @@ class AddTask : AppCompatActivity() {
             this,
             { _, selectedYear, selectedMonth, selectedDay ->
                 val d = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-                notificationDate = d
-                notificationDateField.text = notificationDate
+                if(isNotification){
+                    notificationDate = d
+                    notificationDateField.text = notificationDate
+                }
+                else{
+                    planedDate = d
+                    planedDateField.text = d
+                }
             },
             year, month, day
         )
@@ -190,7 +243,7 @@ class AddTask : AppCompatActivity() {
     }
 
     @SuppressLint("DefaultLocale")
-    private fun showTimePickerDialog() {
+    private fun showTimePickerDialog(isNotification : Boolean) {
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val minute = calendar.get(Calendar.MINUTE)
@@ -199,8 +252,14 @@ class AddTask : AppCompatActivity() {
             this,
             { _, selectedHour, selectedMinute ->
                 val t = String.format("%02d:%02d", selectedHour, selectedMinute)
+                if(isNotification) {
                     notificationTime = t
                     notificationTimeField.text = notificationTime
+                }
+                else {
+                    planedTime = t
+                    planedTimeField.text = t
+                }
             },
             hour, minute, true
         )
@@ -229,6 +288,17 @@ class AddTask : AppCompatActivity() {
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+    }
+
+    private fun showDiscardChangesDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Porzucić zmiany?")
+            .setMessage("Czy na pewno chcesz wyjść bez zapisywania zmian?")
+            .setPositiveButton("Porzuć") { _, _ ->
+                finish()
+            }
+            .setNegativeButton("Anuluj", null)
+            .show()
     }
 }
 

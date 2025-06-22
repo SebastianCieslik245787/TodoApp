@@ -14,6 +14,7 @@
     <string name="attachment_label">Załączniki (opcjonalnie)</string>
     <string name="add_attachment_button">Dodaj załącznik</string>
     <string name="select_category_label">Kategoria</string>
+    <string name="end_task_button">Zakończ zadanie</string>
     <string-array name="category_array">
         <item>Wybierz kategorie</item>
         <item>Praca</item>

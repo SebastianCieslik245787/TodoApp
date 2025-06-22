@@ -17,16 +17,27 @@
             android:id="@+id/addTaskLabel"
             android:layout_width="0dp"
             android:layout_height="50dp"
-            android:gravity="center"
+            android:gravity="center|right"
+            android:paddingEnd="30dp"
             android:text="@string/add_task_label"
             android:textColor="@color/stroke"
-            android:textSize="40sp"
+            android:textSize="38sp"
             app:layout_constraintBottom_toTopOf="@id/addTitleInput"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintWidth_percent="0.9" />
+
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:src="@drawable/back"
+            app:layout_constraintTop_toTopOf="@id/addTaskLabel"
+            app:layout_constraintStart_toStartOf="@id/addTaskLabel"
+            />
 
         <EditText
             android:id="@+id/addTitleInput"
@@ -91,6 +102,61 @@
             android:background="@drawable/text_input_background"
             style="@style/add_task_input"
             />
+
+        <TextView
+            android:id="@+id/addPlanedDateInput"
+            style="@style/add_task_input"
+            android:background="@drawable/text_input_background"
+            android:gravity="center|left"
+            android:text="@string/add_date_input_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/selectCategoryInput" />
+
+        <TextView
+            android:id="@+id/addPlanedDateLabel"
+            style="@style/add_task_input_label"
+            android:text="@string/add_date_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/addPlanedDateInput" />
+
+        <ImageView
+            android:id="@+id/planedCalendar"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/calendar"
+            app:layout_constraintEnd_toEndOf="@id/addPlanedDateInput"
+            app:layout_constraintTop_toTopOf="@id/addPlanedDateInput" />
+
+        <TextView
+            android:id="@+id/addPlanedTimeInput"
+            style="@style/add_task_input"
+            android:background="@drawable/text_input_background"
+            android:gravity="center|left"
+            android:text="@string/add_time_input_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/addPlanedDateInput" />
+
+        <TextView
+            android:id="@+id/addPlanedTimeLabel"
+            style="@style/add_task_input_label"
+            android:text="@string/add_time_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/addPlanedTimeInput" />
+
+        <ImageView
+            android:id="@+id/planedClock"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/clock"
+            app:layout_constraintEnd_toEndOf="@id/addPlanedTimeInput"
+            app:layout_constraintTop_toTopOf="@id/addPlanedTimeInput" />
+
 
         <TextView
             android:id="@+id/selectCategoryLabel"
@@ -209,7 +275,7 @@
             android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/selectCategoryInput"
+            app:layout_constraintTop_toBottomOf="@id/addPlanedTimeInput"
             app:layout_constraintWidth_percent="0.90" />
 
         <LinearLayout

@@ -19,6 +19,8 @@ class DatabaseHelper(context: Context) :
         const val COLUMN_CREATE_TIME = "create_time"
         const val COLUMN_END_DATE = "end_date"
         const val COLUMN_END_TIME = "end_time"
+        const val COLUMN_PLANED_DATE = "planed_date"
+        const val COLUMN_PLANED_TIME = "planed_time"
         const val COLUMN_CATEGORY = "category"
         const val COLUMN_NOTIFICATION_DATE = "notification_date"
         const val COLUMN_NOTIFICATION_TIME = "notification_time"
@@ -36,6 +38,8 @@ class DatabaseHelper(context: Context) :
                 $COLUMN_CREATE_TIME TEXT NOT NULL,
                 $COLUMN_END_DATE TEXT,
                 $COLUMN_END_TIME TEXT,
+                $COLUMN_PLANED_DATE TEXT NOT NULL,
+                $COLUMN_PLANED_TIME TEXT NOT NULL,
                 $COLUMN_CATEGORY TEXT NOT NULL,
                 $COLUMN_NOTIFICATION_DATE TEXT,
                 $COLUMN_NOTIFICATION_TIME TEXT,
