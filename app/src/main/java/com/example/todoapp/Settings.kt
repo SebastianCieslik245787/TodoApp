@@ -1,13 +1,9 @@
 package com.example.todoapp
 
-import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
@@ -74,8 +70,9 @@ class Settings : AppCompatActivity(){
         saveSettings.setOnClickListener {
             sharedPref.edit {
                 putString("hours", hours)
-                putString("minutes", hours)
+                putString("minutes", minutes)
             }
+            Toast.makeText(this, "Ustawienia zapisano", Toast.LENGTH_SHORT).show()
         }
 
         selectHourIcon = findViewById(R.id.selectHourInputIconSettings)

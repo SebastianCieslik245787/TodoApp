@@ -190,8 +190,8 @@ class AddTask : AppCompatActivity() {
                 planedDate = planedDate,
                 planedTime = planedTime,
                 category = category,
-                notificationDate = if (notificationDate.isNotEmpty()) notificationDate else null,
-                notificationTime = if (notificationTime.isNotEmpty()) notificationTime else null,
+                notificationDate = if (notificationOn && notificationDate.isNotEmpty()) notificationDate else null,
+                notificationTime = if (notificationOn && notificationTime.isNotEmpty()) notificationTime else null,
                 hasAttachments = hasAttachment,
                 isDone = false
             )
@@ -228,6 +228,7 @@ class AddTask : AppCompatActivity() {
                         Toast.makeText(this, "Nie udało sie dodać załącznika ${attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
                     }
                 }
+                newTask.id = result.toInt()
                 notificationScheduler.scheduleNotification(newTask)
                 Toast.makeText(this, "Zadanie dodane pomyślnie!", Toast.LENGTH_LONG).show()
                 finish()

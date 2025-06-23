@@ -79,16 +79,23 @@ class NotificationScheduler(private val context: Context) {
     }
 
     private fun getNotificationTimeInMillis(task: Task): Long? {
-        val plannedTimeMillis = convertDateAndTimeToMillis(task.planedDate, task.planedTime)
-
         if (task.notificationDate != null && task.notificationTime != null) {
             return convertDateAndTimeToMillis(task.notificationDate!!, task.notificationTime!!)
         }
 
-        val hours : String = sharedPref?.getString("hours", "0").toString()
-        val minutes : String = sharedPref?.getString("minutes", "1").toString()
+        if (task.notificationDate == null && task.notificationTime == null) {
+            val plannedTimeMillis = convertDateAndTimeToMillis(task.planedDate, task.planedTime)
+            if(sharedPref == null) return null
+            val hours: String = sharedPref!!.getString("hours", "0").toString()
+            val minutes: String = sharedPref!!.getString("minutes", "1").toString()
 
-        return plannedTimeMillis - convertTimeToMillis(hours, minutes)
+            val offset = convertTimeToMillis(hours, minutes)
+            if(plannedTimeMillis > 0 && offset > 0){
+                return plannedTimeMillis - offset
+            }
+        }
+
+        return null
     }
 
     fun cancelNotification(task: Task) {
@@ -115,11 +122,9 @@ class NotificationScheduler(private val context: Context) {
     }
 
     private fun convertTimeToMillis(hours: String, minutes: String): Long {
-        val formatter = DateTimeFormatter.ofPattern("HH:mm")
-
-        val dateTimeStr = "$hours $minutes"
-        val localDateTime = LocalDateTime.parse(dateTimeStr, formatter)
-        return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val hoursInMillis = hours.toLongOrNull()?.times(3600000L) ?: 0L
+        val minutesInMillis = minutes.toLongOrNull()?.times(60000L) ?: 0L
+        return hoursInMillis + minutesInMillis
     }
 
     fun areNotificationsEnabled(): Boolean {

@@ -99,12 +99,19 @@ class ShowTask : AppCompatActivity() {
             endDateField.text = "Zakończono: $currentDate $currentTime"
             endDateField.visibility = VISIBLE
             endButton.visibility = GONE
+            editButton.visibility = GONE
         }
 
         backButton = findViewById(R.id.taskBack)
         backButton.setOnClickListener {
-            setActiveTaskIndex()
-            finish()
+            if (isTaskRoot) {
+                val intent = Intent(this, MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                finish()
+            } else {
+                finish()
+            }
         }
 
         deleteButton = findViewById(R.id.taskDelete)
@@ -113,10 +120,14 @@ class ShowTask : AppCompatActivity() {
         }
 
         editButton = findViewById(R.id.taskEdit)
-        editButton.setOnClickListener {
-            val intent = Intent(this, AddTask::class.java)
-            startActivity(intent)
+        if(!task.isDone){
+            editButton.visibility = VISIBLE
+            editButton.setOnClickListener {
+                val intent = Intent(this, AddTask::class.java)
+                startActivity(intent)
+            }
         }
+
         attachmentsField = findViewById(R.id.AttachmentsField)
     }
 
@@ -140,7 +151,7 @@ class ShowTask : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun fillFields(){
+    private fun fillFields() {
         titleField.text = task.title
         categoryField.text = "Kategoria: ${task.category}"
         descriptionField.text = task.description
@@ -164,7 +175,7 @@ class ShowTask : AppCompatActivity() {
 
         attachmentsField.removeAllViews()
 
-        for (attachment in attachments){
+        for (attachment in attachments) {
             Log.d("ShowTask", "Dodaję widok dla załącznika: ${attachment.fileName}")
             addAttachmentView(attachment)
         }
@@ -206,7 +217,8 @@ class ShowTask : AppCompatActivity() {
         try {
             startActivity(Intent.createChooser(intent, "Otwórz za pomocą..."))
         } catch (_: ActivityNotFoundException) {
-            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 }
