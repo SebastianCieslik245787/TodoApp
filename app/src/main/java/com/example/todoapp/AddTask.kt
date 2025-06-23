@@ -1,7 +1,6 @@
 package com.example.todoapp
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -23,7 +22,6 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -54,8 +52,6 @@ class AddTask : AppCompatActivity() {
     private lateinit var attachmentField: LinearLayout
     private lateinit var backButton: ImageView
     private lateinit var notificationIcon: ImageView
-
-    private var pendingFileToSavePath: String? = null
 
     private var notificationTime: String = ""
     private var notificationDate: String = ""
@@ -263,19 +259,6 @@ class AddTask : AppCompatActivity() {
                 dbManager.updateTask(task)
             }
         }
-    }
-
-    private val createFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val sourcePath = pendingFileToSavePath
-            val destinationUri = result.data?.data
-
-            if (destinationUri != null && sourcePath != null) {
-                copyFileToUri(sourcePath, destinationUri)
-            }
-        }
-        // Czyszczenie zmiennej po zakończeniu operacji (nawet nieudanej)
-        pendingFileToSavePath = null
     }
 
     private fun validateCategory(): Boolean {
@@ -558,34 +541,5 @@ class AddTask : AppCompatActivity() {
             Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT).show()
         }
     }
-
-    private fun copyFileToUri(sourcePath: String, destinationUri: Uri) {
-        val sourceFile = File(sourcePath)
-        if (!sourceFile.exists()) {
-            Toast.makeText(this, "Błąd: Plik źródłowy nie istnieje!", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        try {
-            val inputStream = sourceFile.inputStream()
-            val outputStream = contentResolver.openOutputStream(destinationUri)
-
-            if (outputStream != null) {
-                inputStream.use { input ->
-                    outputStream.use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                Toast.makeText(this, "Plik zapisano pomyślnie!", Toast.LENGTH_SHORT).show()
-            } else {
-                throw IOException("Nie udało się otworzyć strumienia wyjściowego.")
-            }
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Błąd podczas zapisu pliku.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
 }
 
