@@ -77,6 +77,8 @@ class AddTask : AppCompatActivity() {
 
     private var attachmentsList : MutableList<Attachment> = mutableListOf()
 
+    private lateinit var notificationScheduler: NotificationScheduler
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,6 +89,8 @@ class AddTask : AppCompatActivity() {
 
         val prefs = getSharedPreferences("task_prefs", MODE_PRIVATE)
         currentTaskId = prefs.getInt("selected_task_id", -1)
+
+        notificationScheduler = NotificationScheduler(applicationContext)
 
         if (currentTaskId != -1) {
             task = dbManager.getTaskById(currentTaskId)
@@ -125,6 +129,7 @@ class AddTask : AppCompatActivity() {
         outState.putBoolean("hasAttachment", hasAttachment)
     }
 
+    @SuppressLint("ScheduleExactAlarm")
     private fun setup() {
         titleInput = findViewById(R.id.addTitleInput)
         descriptionInput = findViewById(R.id.addDescriptionInput)
@@ -203,6 +208,7 @@ class AddTask : AppCompatActivity() {
                             Toast.makeText(this, "Nie udało sie dodać załącznika ${attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
                         }
                     }
+                    notificationScheduler.scheduleNotification(newTask)
                     Toast.makeText(this, "Zadanie edytowano pomyślnie!", Toast.LENGTH_LONG).show()
                     finish()
                 } else {
@@ -222,6 +228,7 @@ class AddTask : AppCompatActivity() {
                         Toast.makeText(this, "Nie udało sie dodać załącznika ${attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
                     }
                 }
+                notificationScheduler.scheduleNotification(newTask)
                 Toast.makeText(this, "Zadanie dodane pomyślnie!", Toast.LENGTH_LONG).show()
                 finish()
             } else {

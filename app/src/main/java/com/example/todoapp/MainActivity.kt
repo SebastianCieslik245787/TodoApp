@@ -18,6 +18,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -119,6 +120,8 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener {
             val intent = Intent(this, AddTask::class.java)
             startActivity(intent)
+            val sharedPreferences = getSharedPreferences("task_prefs", MODE_PRIVATE)
+            sharedPreferences.edit { putInt("selected_task_id", -1) }
         }
 
         tasksField = findViewById(R.id.recyclerViewTasks)
@@ -128,6 +131,11 @@ class MainActivity : AppCompatActivity() {
 
         findQuery = findViewById(R.id.taskQuery)
         settingsButton = findViewById(R.id.settingsButton)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this, Settings::class.java)
+            startActivity(intent)
+        }
+
         categorySpinner = findViewById(R.id.selectCategoryInputFilter)
         setCategorySpinner()
         sortingSpinner = findViewById(R.id.selectSortingInputFilter)

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/settingsBackButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/back"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="50dp"
+        android:layout_marginStart="20dp"
+        />
+
+    <TextView
+        android:id="@+id/addTaskLabel"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:gravity="center|right"
+        android:paddingEnd="30dp"
+        android:text="@string/settings_label"
+        android:textColor="@color/stroke"
+        android:textSize="38sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/settingsBackButton"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <Spinner
+        android:id="@+id/selectHourInputSettings"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="50dp"
+        app:layout_constraintTop_toBottomOf="@id/settingsBackButton"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="25dp"
+        app:layout_constraintWidth_percent="0.4"
+        android:background="@drawable/text_input_background"
+        style="@style/add_task_input"
+        android:paddingStart="5dp"
+        />
+
+    <ImageView
+        android:id="@+id/selectHourInputIconSettings"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="13dp"
+        android:src="@drawable/arrow_down"
+        app:layout_constraintEnd_toEndOf="@id/selectHourInputSettings"
+        app:layout_constraintTop_toTopOf="@id/selectHourInputSettings" />
+
+    <Spinner
+        android:id="@+id/selectMinuteInputSettings"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="50dp"
+        app:layout_constraintTop_toBottomOf="@id/settingsBackButton"
+        app:layout_constraintStart_toEndOf="@id/selectHourInputSettings"
+        android:layout_marginStart="30dp"
+        app:layout_constraintWidth_percent="0.4"
+        android:background="@drawable/text_input_background"
+        style="@style/add_task_input"
+        android:paddingStart="5dp"
+        />
+
+    <ImageView
+        android:id="@+id/selectMinuteInputIconSettings"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="13dp"
+        android:src="@drawable/arrow_down"
+        app:layout_constraintEnd_toEndOf="@id/selectMinuteInputSettings"
+        app:layout_constraintTop_toTopOf="@id/selectMinuteInputSettings" />
+
+    <TextView
+        android:id="@+id/confirmSettingsButton"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:text="@string/confirm_filters_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintTop_toBottomOf="@id/selectMinuteInputSettings"
+        style="@style/add_task_button"
+        android:layout_height="50dp"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

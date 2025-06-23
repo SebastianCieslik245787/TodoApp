@@ -39,6 +39,8 @@ class ShowTask : AppCompatActivity() {
     private lateinit var task: Task
     private var attachments: List<Attachment> = mutableListOf()
 
+    private lateinit var notificationScheduler: NotificationScheduler
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -48,6 +50,8 @@ class ShowTask : AppCompatActivity() {
 
         val prefs = getSharedPreferences("task_prefs", MODE_PRIVATE)
         val taskId = prefs.getInt("selected_task_id", -1)
+
+        notificationScheduler = NotificationScheduler(applicationContext)
 
         if (taskId != -1) {
             task = dbManager.getTaskById(taskId)
@@ -126,6 +130,7 @@ class ShowTask : AppCompatActivity() {
             .setTitle("Usunąć zadanie?")
             .setMessage("Czy na pewno chcesz usunąć zadanie?")
             .setPositiveButton("Usuń") { _, _ ->
+                notificationScheduler.cancelNotification(task)
                 dbManager.deleteTaskById(task.id)
                 setActiveTaskIndex()
                 finish()
