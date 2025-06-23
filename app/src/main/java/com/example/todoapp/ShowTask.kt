@@ -29,7 +29,6 @@ class ShowTask : AppCompatActivity() {
     private lateinit var backButton: ImageView
     private lateinit var deleteButton: ImageView
     private lateinit var editButton: ImageView
-    private lateinit var toggleNotificationButton: ImageView
     private lateinit var attachmentsField: LinearLayout
 
     private lateinit var task: Task
@@ -104,7 +103,6 @@ class ShowTask : AppCompatActivity() {
             val intent = Intent(this, AddTask::class.java)
             startActivity(intent)
         }
-        toggleNotificationButton = findViewById(R.id.taskNotifications)
         attachmentsField = findViewById(R.id.attachmentField)
     }
 

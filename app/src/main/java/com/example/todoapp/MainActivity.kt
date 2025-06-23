@@ -50,13 +50,12 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        savedInstanceState?.let {
-            category = it.getString("category", "Wybierz kategorię...")
-            sorting = it.getString("sorting", "Wybierz sortowanie...")
-            query = it.getString("query", "")
-            showDoneTasks = it.getBoolean("showDoneTasks", showDoneTasks)
-            showDoneTasksFilter = it.getBoolean("showDoneTasksFilter", showDoneTasksFilter)
-        }
+        val sharedPref = getSharedPreferences("filters", MODE_PRIVATE)
+        category = sharedPref.getString("category", "Wybierz kategorię...") ?: "Wybierz kategorię..."
+        sorting = sharedPref.getString("sorting", "Wybierz sortowanie...") ?: "Wybierz sortowanie..."
+        query = sharedPref.getString("query", "") ?: ""
+        showDoneTasks = sharedPref.getBoolean("showDoneTasks", false)
+        showDoneTasksFilter = sharedPref.getBoolean("showDoneTasksFilter", false)
 
         setup()
         fillFields()
@@ -95,15 +94,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadTasks()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("category", category)
-        outState.putString("sorting", sorting)
-        outState.putString("query", findQuery.text.toString())
-        outState.putBoolean("showDoneTasks", showDoneTasks)
-        outState.putBoolean("showDoneTasksFilter", showDoneTasksFilter)
     }
 
     private fun loadTasks() {
@@ -152,6 +142,17 @@ class MainActivity : AppCompatActivity() {
         executeFiltersButton.setOnClickListener {
             query = findQuery.text.toString()
             showDoneTasks = showDoneTasksFilter
+
+            val sharedPref = getSharedPreferences("filters", MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                putString("category", category)
+                putString("sorting", sorting)
+                putString("query", query)
+                putBoolean("showDoneTasks", showDoneTasks)
+                putBoolean("showDoneTasksFilter", showDoneTasksFilter)
+                apply()
+            }
+
             loadTasks()
         }
     }

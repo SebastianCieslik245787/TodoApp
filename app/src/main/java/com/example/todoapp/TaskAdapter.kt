@@ -3,6 +3,8 @@ import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -16,9 +18,12 @@ class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdap
 
     inner class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.taskItemTitle)
-        val createdDate: TextView = itemView.findViewById(R.id.taskItemCreatedDateAndTime)
+        val planedDate: TextView = itemView.findViewById(R.id.taskItemPlanedDateAndTime)
         val notificationIcon: ImageView = itemView.findViewById(R.id.taskItemNotificationIcon)
         val attachmentIcon: ImageView = itemView.findViewById(R.id.taskItemAttachmentIcon)
+        val doneIcon: ImageView = itemView.findViewById(R.id.doneIcon)
+        val endDate: TextView = itemView.findViewById(R.id.taskItemEndDataAndTime)
+        val category: TextView = itemView.findViewById(R.id.taskItemCategory)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -30,15 +35,23 @@ class TaskAdapter(private val tasks: List<Task>) : RecyclerView.Adapter<TaskAdap
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = tasks[position]
         holder.title.text = task.title
-        holder.createdDate.text = "${task.planedDate} ${task.planedTime}"
+        holder.planedDate.text = "Zaplanowano na: ${task.planedDate} ${task.planedTime}"
+        holder.category.text = task.category
+
 
         holder.notificationIcon.visibility = if (!task.notificationDate.isNullOrBlank() || !task.notificationTime.isNullOrBlank()) {
-            View.VISIBLE
+            VISIBLE
         } else {
-            View.GONE
+            GONE
         }
 
-        holder.attachmentIcon.visibility = if (task.hasAttachments) View.VISIBLE else View.GONE
+        holder.attachmentIcon.visibility = if (task.hasAttachments) VISIBLE else GONE
+
+        if(task.isDone){
+            holder.doneIcon.visibility = VISIBLE
+            holder.endDate.text = "${task.endDate} ${task.endTime}"
+            holder.endDate.visibility = VISIBLE
+        }
 
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context

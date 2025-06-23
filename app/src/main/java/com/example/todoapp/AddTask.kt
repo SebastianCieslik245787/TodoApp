@@ -49,7 +49,7 @@ class AddTask : AppCompatActivity() {
     private var description: String = ""
 
     private lateinit var categorySpinner: Spinner
-    private var category: String = "Wybierz kategorię..."
+    private var category: String = "Wybierz kategorię"
 
     private lateinit var dbManager: DatabaseManager
 
@@ -81,7 +81,7 @@ class AddTask : AppCompatActivity() {
             }
         }
 
-        fillFields()
+        if(currentTaskId != -1) fillFields()
         setup()
     }
 
@@ -188,7 +188,11 @@ class AddTask : AppCompatActivity() {
     }
 
     private fun validateCategory(): Boolean {
-        return category != "Wybierz kategorię..."
+        if(category == "Wybierz kategorię"){
+            Toast.makeText(this, "Nie wybrano kategorii!", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
     }
 
     private fun validateText(text: String, message: String): Boolean {
