@@ -12,6 +12,12 @@ class DatabaseHelper(context: Context) :
         private const val DATABASE_VERSION = 1
 
         const val TABLE_TASKS = "tasks"
+        const val TABLE_ATTACHMENTS = "attachments"
+        const val COLUMN_TASK_ID = "task_id"
+        const val COLUMN_FORMAT = "format"
+        const val COLUMN_FILENAME = "filename"
+        const val COLUMN_LOCAL_PATH = "local_path"
+
         const val COLUMN_ID = "id"
         const val COLUMN_TITLE = "title"
         const val COLUMN_DESCRIPTION = "description"
@@ -48,6 +54,17 @@ class DatabaseHelper(context: Context) :
             )
         """.trimIndent()
         db?.execSQL(createTable)
+
+        val createTableAttachments = """
+            CREATE TABLE $TABLE_ATTACHMENTS (
+                $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_TASK_ID INTEGER NOT NULL,
+                $COLUMN_FORMAT TEXT NOT NULL,
+                $COLUMN_FILENAME TEXT NOT NULL,
+                $COLUMN_LOCAL_PATH TEXT NOT NULL
+            )
+        """.trimIndent()
+        db?.execSQL(createTableAttachments)
     }
 
     override fun onUpgrade(
@@ -56,6 +73,7 @@ class DatabaseHelper(context: Context) :
         newVersion: Int
     ) {
         db?.execSQL("DROP TABLE IF EXISTS $TABLE_TASKS")
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_ATTACHMENTS")
         onCreate(db)
     }
 }

@@ -1,12 +1,19 @@
 package com.example.todoapp
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -16,7 +23,13 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -33,11 +46,16 @@ class AddTask : AppCompatActivity() {
     private lateinit var addTaskButton: TextView
     private lateinit var notificationDateField: TextView
     private lateinit var notificationTimeField: TextView
+    private lateinit var notificationDateLabel: TextView
+    private lateinit var notificationTimeLabel: TextView
     private lateinit var planedDateField: TextView
     private lateinit var planedTimeField: TextView
     private lateinit var addAttachmentButton: TextView
     private lateinit var attachmentField: LinearLayout
     private lateinit var backButton: ImageView
+    private lateinit var notificationIcon: ImageView
+
+    private var pendingFileToSavePath: String? = null
 
     private var notificationTime: String = ""
     private var notificationDate: String = ""
@@ -51,10 +69,16 @@ class AddTask : AppCompatActivity() {
     private lateinit var categorySpinner: Spinner
     private var category: String = "Wybierz kategorię"
 
+    private var notificationOn: Boolean = false
+
     private lateinit var dbManager: DatabaseManager
 
     private lateinit var task: Task
     private var currentTaskId by Delegates.notNull<Int>()
+
+    private val PICK_FILE_REQUEST_CODE = 1001
+
+    private var attachmentsList : MutableList<Attachment> = mutableListOf()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,11 +102,13 @@ class AddTask : AppCompatActivity() {
                 planedTime = it.getString("planedTime", "")
                 title = it.getString("title", "")
                 description = it.getString("description", "")
+                notificationOn = it.getBoolean("notificationOn", false)
             }
         }
 
-        if(currentTaskId != -1) fillFields()
+        if (currentTaskId != -1) fillFields()
         setup()
+        setVisibilityNotification()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -94,6 +120,7 @@ class AddTask : AppCompatActivity() {
         outState.putString("notificationTime", notificationTime)
         outState.putString("planedDate", planedDate)
         outState.putString("planedTime", planedTime)
+        outState.putBoolean("notificationOn", notificationOn)
     }
 
     private fun setup() {
@@ -115,7 +142,9 @@ class AddTask : AppCompatActivity() {
         setSpinner()
         backButton = findViewById(R.id.backButton)
         backButton.setOnClickListener { showDiscardChangesDialog() }
-
+        notificationDateLabel = findViewById(R.id.addNotificationDateLabel)
+        notificationTimeLabel = findViewById(R.id.addNotificationTimeLabel)
+        notificationIcon = findViewById(R.id.notificationButtonIcon)
 
         if (!notificationTime.isBlank()) notificationTimeField.text = notificationTime
         if (!notificationDate.isBlank()) notificationDateField.text = notificationDate
@@ -158,14 +187,15 @@ class AddTask : AppCompatActivity() {
                 isDone = false
             )
 
-            if(currentTaskId != -1){
+            if (currentTaskId != -1) {
                 newTask.id = currentTaskId
                 val result = dbManager.updateTask(newTask)
                 if (result > -1) {
                     Toast.makeText(this, "Zadanie edytowano pomyślnie!", Toast.LENGTH_LONG).show()
                     finish()
                 } else {
-                    Toast.makeText(this, "Błąd podczas edytowania zadania.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Błąd podczas edytowania zadania.", Toast.LENGTH_LONG)
+                        .show()
                 }
                 return@setOnClickListener
             }
@@ -181,14 +211,75 @@ class AddTask : AppCompatActivity() {
 
         }
 
+        notificationsButton.setOnClickListener {
+            notificationOn = !notificationOn
+            setVisibilityNotification()
+        }
+
+        addAttachmentButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/pdf", "image/*"))
+            }
+            startActivityForResult(Intent.createChooser(intent, "Wybierz plik"), PICK_FILE_REQUEST_CODE)
+        }
+
         dateNotificationInput.setOnClickListener { showDatePickerDialog(true) }
         timeNotificationInput.setOnClickListener { showTimePickerDialog(true) }
         planedDateInput.setOnClickListener { showDatePickerDialog(false) }
         planedTimeInput.setOnClickListener { showTimePickerDialog(false) }
     }
 
+    @SuppressLint("SetTextI18n")
+    private fun setVisibilityNotification(){
+        val visibility = if (notificationOn) VISIBLE else GONE
+
+        notificationDateLabel.visibility = visibility
+        notificationTimeLabel.visibility = visibility
+        notificationTimeField.visibility = visibility
+        notificationDateField.visibility = visibility
+        timeNotificationInput.visibility = visibility
+        dateNotificationInput.visibility = visibility
+
+        if(notificationOn){
+            notificationsButton.text = "Włączone"
+            notificationsButton.setTextColor(ContextCompat.getColor(this, R.color.add_task_background))
+            notificationsButton.background = ContextCompat.getDrawable(this, R.drawable.notifications_button)
+            notificationIcon.setImageResource(R.drawable.notification_addtask)
+        }
+        else{
+            notificationsButton.text = "Wyłączone"
+            notificationsButton.setTextColor(ContextCompat.getColor(this, R.color.stroke))
+            notificationsButton.background = ContextCompat.getDrawable(this, R.drawable.text_input_background)
+            notificationIcon.setImageResource(R.drawable.no_notification)
+        }
+
+        if(!notificationOn && (notificationTime != "" || notificationDate != "")){
+            notificationTime = ""
+            notificationDate = ""
+            if(currentTaskId != -1){
+                task.notificationDate = null
+                task.notificationTime = null
+                dbManager.updateTask(task)
+            }
+        }
+    }
+
+    private val createFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val sourcePath = pendingFileToSavePath
+            val destinationUri = result.data?.data
+
+            if (destinationUri != null && sourcePath != null) {
+                copyFileToUri(sourcePath, destinationUri)
+            }
+        }
+        // Czyszczenie zmiennej po zakończeniu operacji (nawet nieudanej)
+        pendingFileToSavePath = null
+    }
+
     private fun validateCategory(): Boolean {
-        if(category == "Wybierz kategorię"){
+        if (category == "Wybierz kategorię") {
             Toast.makeText(this, "Nie wybrano kategorii!", Toast.LENGTH_SHORT).show()
             return false
         }
@@ -362,5 +453,139 @@ class AddTask : AppCompatActivity() {
         if (task.notificationDate != null) notificationDate = task.notificationDate ?: ""
         category = task.category
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
+            val uri: Uri? = data?.data
+            if (uri != null) {
+                handleFile(uri)
+            }
+        }
+    }
+
+    private fun handleFile(uri: Uri) {
+        val fileName = getFileName(uri)
+        val mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
+
+        val destinationFile = File(filesDir, fileName)
+        try {
+            contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(destinationFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+        } catch (_: IOException) {
+            Toast.makeText(this, "Błąd kopiowania pliku", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val attachment = Attachment(
+            fileName = fileName,
+            format = mimeType,
+            localPath = destinationFile.absolutePath
+        )
+        attachmentsList.add(attachment)
+        addAttachmentView(attachment)
+    }
+
+    private fun addAttachmentView(attachment: Attachment) {
+        val view = layoutInflater.inflate(R.layout.attachment, attachmentField, false)
+
+        val attachmentName: TextView = view.findViewById(R.id.attachmentName)
+        val deleteAttachmentButton: ImageView = view.findViewById(R.id.deleteAttachmentIcon)
+
+        attachmentName.text = attachment.fileName
+
+        attachmentName.setOnClickListener {
+            openFile(attachment.localPath, attachment.format)
+        }
+
+        deleteAttachmentButton.setOnClickListener {
+            val file = File(attachment.localPath)
+            if (file.exists()) file.delete()
+
+            attachmentField.removeView(view)
+            attachmentsList.remove(attachment)
+            //TODO USUŃ Z BAZY JAK BEDZIE EDIT
+        }
+
+        attachmentField.addView(view)
+    }
+
+    @SuppressLint("Range")
+    private fun getFileName(uri: Uri): String {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = contentResolver.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    result = it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/')
+            if (cut != null && cut != -1) {
+                result = result.substring(cut + 1)
+            }
+        }
+        return result ?: "unknown"
+    }
+
+    private fun openFile(filePath: String, mimeType: String) {
+        val file = File(filePath)
+        if (!file.exists()) {
+            Toast.makeText(this, "Plik nie istnieje!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            file
+        )
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, mimeType)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        try {
+            startActivity(Intent.createChooser(intent, "Otwórz za pomocą..."))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun copyFileToUri(sourcePath: String, destinationUri: Uri) {
+        val sourceFile = File(sourcePath)
+        if (!sourceFile.exists()) {
+            Toast.makeText(this, "Błąd: Plik źródłowy nie istnieje!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            val inputStream = sourceFile.inputStream()
+            val outputStream = contentResolver.openOutputStream(destinationUri)
+
+            if (outputStream != null) {
+                inputStream.use { input ->
+                    outputStream.use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                Toast.makeText(this, "Plik zapisano pomyślnie!", Toast.LENGTH_SHORT).show()
+            } else {
+                throw IOException("Nie udało się otworzyć strumienia wyjściowego.")
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Błąd podczas zapisu pliku.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 }
 

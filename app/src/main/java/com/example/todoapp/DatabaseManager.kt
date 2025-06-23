@@ -23,6 +23,17 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
         return db.insert(DatabaseHelper.TABLE_TASKS, null, values)
     }
 
+    fun insertAttachment(attachment: Attachment): Long {
+        val db = dbHelper.writableDatabase
+        val values = ContentValues().apply {
+            put(DatabaseHelper.COLUMN_TASK_ID, attachment.taskId)
+            put(DatabaseHelper.COLUMN_FORMAT, attachment.format)
+            put(DatabaseHelper.COLUMN_FILENAME, attachment.fileName)
+            put(DatabaseHelper.COLUMN_LOCAL_PATH, attachment.localPath)
+        }
+        return db.insert(DatabaseHelper.TABLE_ATTACHMENTS, null, values)
+    }
+
     private fun parseCursorToTask(cursor: Cursor): Task {
         return Task(
             id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID)),
@@ -107,6 +118,45 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
         )
     }
 
+    fun getAttachmentsForTask(taskId : Int) : List<Attachment>{
+        val db = dbHelper.readableDatabase
+        val attachments = mutableListOf<Attachment>()
+
+        val cursor = db.query(
+            DatabaseHelper.TABLE_ATTACHMENTS,
+            null,
+            "${DatabaseHelper.COLUMN_TASK_ID} = ?",
+            arrayOf(taskId.toString()),
+            null,
+            null,
+            null
+        )
+
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID))
+                val format = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_FORMAT))
+                val fileName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_FILENAME))
+                val localPath = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_LOCAL_PATH))
+
+                val attachment = Attachment(
+                    id = id,
+                    taskId = taskId,
+                    format = format,
+                    fileName = fileName,
+                    localPath =localPath
+                )
+
+                attachments.add(attachment)
+            } while (cursor.moveToNext())
+        }
+
+        cursor.close()
+        db.close()
+
+        return attachments
+    }
+
     fun updateTask(task: Task): Int {
         val db = dbHelper.writableDatabase
 
@@ -140,6 +190,13 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
     fun deleteTaskById(id: Int): Boolean {
         val db = dbHelper.writableDatabase
         val result = db.delete(DatabaseHelper.TABLE_TASKS, "id = ?", arrayOf(id.toString()))
+        db.close()
+        return result > 0
+    }
+
+    fun deleteAttachmentById(id: Int): Boolean {
+        val db = dbHelper.writableDatabase
+        val result = db.delete(DatabaseHelper.TABLE_ATTACHMENTS, "id = ?", arrayOf(id.toString()))
         db.close()
         return result > 0
     }
