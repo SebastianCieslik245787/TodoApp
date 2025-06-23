@@ -2,7 +2,6 @@ package com.example.todoapp
 
 import android.content.ContentValues
 import android.database.Cursor
-import android.util.Log
 
 class DatabaseManager(private val dbHelper: DatabaseHelper) {
     fun insertTask(task: Task): Long {
@@ -74,7 +73,12 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
         return task.first()
     }
 
-    fun getTasks(sequence: String? = null, category: String? = null, sorted: Boolean = false): List<Task> {
+    fun getTasks(
+        sequence: String? = null,
+        category: String? = null,
+        sorted: Boolean = false,
+        showDone: Boolean = true
+    ): List<Task> {
         val selectionParts = mutableListOf<String>()
         val selectionArgs = mutableListOf<String>()
 
@@ -83,17 +87,24 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
             selectionArgs.add("%$sequence%")
         }
 
-        if (!category.isNullOrEmpty()) {
+        if (!category.isNullOrEmpty() && category != "Wybierz kategorię" && category != "Wybierz kategorię...") {
             selectionParts.add("${DatabaseHelper.COLUMN_CATEGORY} = ?")
             selectionArgs.add(category)
+        }
+
+        if (!showDone) {
+            selectionParts.add("${DatabaseHelper.COLUMN_IS_DONE} = ?")
+            selectionArgs.add("0")
         }
 
         val selection = if (selectionParts.isNotEmpty()) selectionParts.joinToString(" AND ") else null
         val orderBy = if (sorted) "${DatabaseHelper.COLUMN_PLANED_DATE} ASC, ${DatabaseHelper.COLUMN_PLANED_TIME} ASC" else null
 
-        Log.d("XD", "XD")
-
-        return queryTasks(selection, if (selectionArgs.isNotEmpty()) selectionArgs.toTypedArray() else null, orderBy)
+        return queryTasks(
+            selection = selection,
+            selectionArgs = if (selectionArgs.isNotEmpty()) selectionArgs.toTypedArray() else null,
+            orderBy = orderBy
+        )
     }
 
     fun updateTask(task: Task): Int {

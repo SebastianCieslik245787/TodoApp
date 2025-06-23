@@ -6,30 +6,135 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/add_task_background"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:id="@+id/filters"
+    <EditText
+        android:id="@+id/taskQuery"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="horizontal"
-        app:layout_constraintHeight_percent="0.2"
-        app:layout_constraintWidth_percent="0.9"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="52dp"
+        android:autofillHints=""
+        android:background="@drawable/text_input_background"
+        android:hint="@string/task_query_hint"
+        android:inputType="text"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/recyclerViewTasks"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.72" />
+
+
+    <Spinner
+        android:id="@+id/selectCategoryInputFilter"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/taskQuery"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="25dp"
+        app:layout_constraintWidth_percent="0.4"
+        android:background="@drawable/text_input_background"
+        style="@style/add_task_input"
+        android:paddingStart="5dp"
+        />
+
+    <ImageView
+        android:id="@+id/selectCategoryInputIconFilter"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="13dp"
+        android:src="@drawable/arrow_down"
+        app:layout_constraintEnd_toEndOf="@id/selectCategoryInputFilter"
+        app:layout_constraintTop_toTopOf="@id/selectCategoryInputFilter" />
+
+    <Spinner
+        android:id="@+id/selectSortingInputFilter"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/taskQuery"
+        app:layout_constraintStart_toEndOf="@id/selectCategoryInputFilter"
+        android:layout_marginStart="30dp"
+        app:layout_constraintWidth_percent="0.4"
+        android:background="@drawable/text_input_background"
+        style="@style/add_task_input"
+        android:paddingStart="5dp"
+        />
+
+    <ImageView
+        android:id="@+id/selectSortingInputIconFilter"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="13dp"
+        android:src="@drawable/arrow_down"
+        app:layout_constraintEnd_toEndOf="@id/selectSortingInputFilter"
+        app:layout_constraintTop_toTopOf="@id/selectSortingInputFilter" />
+
+
+
+    <ImageView
+        android:id="@+id/settingsButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:layout_constraintTop_toTopOf="@id/taskQuery"
+        app:layout_constraintStart_toEndOf="@id/taskQuery"
+        android:layout_marginTop="5dp"
+        android:src="@drawable/settings"
+        android:layout_marginStart="30dp"
+        />
+
+    <TextView
+        android:id="@+id/showDoneTaskLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:text="@string/show_done_task_checkbox_label"
+        android:layout_marginStart="70dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="25dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintTop_toBottomOf="@id/selectCategoryInputFilter"
+        />
+
+    <TextView
+        android:id="@+id/confirmFiltersButton"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:paddingStart="30dp"
+        android:paddingEnd="30dp"
+        android:text="@string/confirm_filters_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintTop_toBottomOf="@id/selectSortingInputFilter"
+        style="@style/add_task_button"
+        android:layout_height="30dp"
+        />
+
+    <ImageView
+        android:id="@+id/showDoneTaskCheckBox"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        app:layout_constraintTop_toTopOf="@id/showDoneTaskLabel"
+        app:layout_constraintEnd_toStartOf="@id/showDoneTaskLabel"
+        android:src="@drawable/unchecked"
+        android:layout_marginTop="-5dp"
+        android:layout_marginEnd="10dp"
         />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:background="@drawable/tasks_field"
         android:id="@+id/recyclerViewTasks"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/filters"
+        app:layout_constraintTop_toBottomOf="@id/showDoneTaskLabel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"
         android:padding="10dp"
         android:paddingBottom="20dp"
         />
@@ -38,12 +143,12 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="Dodaj zadanie"
+        android:contentDescription="@string/fab_description"
         app:backgroundTint="@color/stroke"
         app:srcCompat="@drawable/add_task_icon"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginBottom="30dp"
-        android:layout_marginRight="15dp" />
+        android:layout_marginEnd="15dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
