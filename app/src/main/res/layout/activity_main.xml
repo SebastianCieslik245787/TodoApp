@@ -12,29 +12,31 @@
     <EditText
         android:id="@+id/taskQuery"
         android:layout_width="0dp"
-        android:layout_height="50dp"
+        android:layout_height="@dimen/height_query"
         android:layout_marginStart="16dp"
         android:layout_marginTop="52dp"
         android:autofillHints=""
         android:background="@drawable/text_input_background"
         android:hint="@string/task_query_hint"
+        android:textColor="@color/input_text_color"
+        android:textColorHint="@color/input_text_color"
         android:inputType="text"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.72" />
+        app:layout_constraintWidth_percent="@dimen/width_query" />
 
 
     <Spinner
         android:id="@+id/selectCategoryInputFilter"
         android:layout_width="0dp"
-        android:layout_height="50dp"
+        android:layout_height="@dimen/height_query"
         android:layout_marginTop="20dp"
         app:layout_constraintTop_toBottomOf="@id/taskQuery"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="25dp"
-        app:layout_constraintWidth_percent="0.4"
+        app:layout_constraintWidth_percent="@dimen/width_select_filter"
         android:background="@drawable/text_input_background"
         style="@style/add_task_input"
         android:paddingStart="5dp"
@@ -45,7 +47,7 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="@dimen/margin_top_select_filter_icon"
         android:src="@drawable/arrow_down"
         app:layout_constraintEnd_toEndOf="@id/selectCategoryInputFilter"
         app:layout_constraintTop_toTopOf="@id/selectCategoryInputFilter" />
@@ -53,12 +55,12 @@
     <Spinner
         android:id="@+id/selectSortingInputFilter"
         android:layout_width="0dp"
-        android:layout_height="50dp"
+        android:layout_height="@dimen/height_query"
         android:layout_marginTop="20dp"
         app:layout_constraintTop_toBottomOf="@id/taskQuery"
         app:layout_constraintStart_toEndOf="@id/selectCategoryInputFilter"
         android:layout_marginStart="30dp"
-        app:layout_constraintWidth_percent="0.4"
+        app:layout_constraintWidth_percent="@dimen/width_select_filter"
         android:background="@drawable/text_input_background"
         style="@style/add_task_input"
         android:paddingStart="5dp"
@@ -69,12 +71,10 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="@dimen/margin_top_select_filter_icon"
         android:src="@drawable/arrow_down"
         app:layout_constraintEnd_toEndOf="@id/selectSortingInputFilter"
         app:layout_constraintTop_toTopOf="@id/selectSortingInputFilter" />
-
-
 
     <ImageView
         android:id="@+id/settingsButton"
@@ -93,6 +93,7 @@
         android:layout_height="wrap_content"
         android:textSize="15sp"
         android:text="@string/show_done_task_checkbox_label"
+        android:textColor="@color/input_text_color"
         android:layout_marginStart="70dp"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="25dp"
@@ -112,6 +113,7 @@
         app:layout_constraintTop_toBottomOf="@id/selectSortingInputFilter"
         style="@style/add_task_button"
         android:layout_height="30dp"
+        android:textColor="@color/button_text_color"
         />
 
     <ImageView

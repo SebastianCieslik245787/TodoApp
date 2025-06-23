@@ -38,7 +38,7 @@
         app:layout_constraintTop_toBottomOf="@id/settingsBackButton"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="25dp"
-        app:layout_constraintWidth_percent="0.4"
+        app:layout_constraintWidth_percent="@dimen/width_select_filter"
         android:background="@drawable/text_input_background"
         style="@style/add_task_input"
         android:paddingStart="5dp"
@@ -62,7 +62,7 @@
         app:layout_constraintTop_toBottomOf="@id/settingsBackButton"
         app:layout_constraintStart_toEndOf="@id/selectHourInputSettings"
         android:layout_marginStart="30dp"
-        app:layout_constraintWidth_percent="0.4"
+        app:layout_constraintWidth_percent="@dimen/width_select_filter"
         android:background="@drawable/text_input_background"
         style="@style/add_task_input"
         android:paddingStart="5dp"
@@ -90,6 +90,7 @@
         app:layout_constraintTop_toBottomOf="@id/selectMinuteInputSettings"
         style="@style/add_task_button"
         android:layout_height="50dp"
+        android:textColor="@color/button_text_color"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,6 +22,7 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -53,20 +54,10 @@ class AddTask : AppCompatActivity() {
     private lateinit var backButton: ImageView
     private lateinit var notificationIcon: ImageView
 
-    private var notificationTime: String = ""
-    private var notificationDate: String = ""
-
-    private var planedTime: String = ""
-    private var planedDate: String = ""
-
-    private var title: String = ""
-    private var description: String = ""
+    private val viewModel: AddTaskViewModel by viewModels()
 
     private lateinit var categorySpinner: Spinner
     private var category: String = "Wybierz kategorię"
-
-    private var notificationOn: Boolean = false
-    private var hasAttachment: Boolean = false
 
     private lateinit var dbManager: DatabaseManager
 
@@ -74,8 +65,6 @@ class AddTask : AppCompatActivity() {
     private var currentTaskId by Delegates.notNull<Int>()
 
     private val PICK_FILE_REQUEST_CODE = 1001
-
-    private var attachmentsList : MutableList<Attachment> = mutableListOf()
 
     private lateinit var notificationScheduler: NotificationScheduler
 
@@ -92,44 +81,34 @@ class AddTask : AppCompatActivity() {
 
         notificationScheduler = NotificationScheduler(applicationContext)
 
-        if (currentTaskId != -1) {
-            task = dbManager.getTaskById(currentTaskId)
-            attachmentsList = dbManager.getAttachmentsForTask(task.id) as MutableList<Attachment>
-            if(attachmentsList.isNotEmpty()) hasAttachment = true
-        } else {
-            savedInstanceState?.let {
-                category = it.getString("category", "Wybierz kategorię...")
-                notificationDate = it.getString("notificationDate", "")
-                notificationTime = it.getString("notificationTime", "")
-                planedDate = it.getString("planedDate", "")
-                planedTime = it.getString("planedTime", "")
-                title = it.getString("title", "")
-                description = it.getString("description", "")
-                notificationOn = it.getBoolean("notificationOn", false)
-                hasAttachment = it.getBoolean("hasAttachment", false)
-            }
+        if (savedInstanceState == null && currentTaskId != -1) {
+            val task = dbManager.getTaskById(currentTaskId)
+            val attachments = dbManager.getAttachmentsForTask(task.id)
+            fillViewModelFromTask(task, attachments)
         }
 
-        if (currentTaskId != -1) fillFields()
         setup()
         setVisibilityNotification()
-        for (i in attachmentsList) addAttachmentView(i)
+        for (i in viewModel.attachmentsList) addAttachmentView(i)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("category", category)
-        outState.putString("title", titleInput.text.toString())
-        outState.putString("description", descriptionInput.text.toString())
-        outState.putString("notificationDate", notificationDate)
-        outState.putString("notificationTime", notificationTime)
-        outState.putString("planedDate", planedDate)
-        outState.putString("planedTime", planedTime)
-        outState.putBoolean("notificationOn", notificationOn)
-        outState.putBoolean("hasAttachment", hasAttachment)
+    private fun fillViewModelFromTask(task: Task, attachments: List<Attachment>) {
+        viewModel.title = task.title
+        viewModel.description = task.description
+        viewModel.planedDate = task.planedDate
+        viewModel.planedTime = task.planedTime
+        if (task.notificationDate != null && task.notificationTime != null) {
+            viewModel.notificationDate = task.notificationDate.toString()
+            viewModel.notificationTime = task.notificationTime.toString()
+            viewModel.notificationOn = true
+        }
+        viewModel.category = task.category
+        viewModel.hasAttachment = task.hasAttachments
+        viewModel.attachmentsList.clear()
+        viewModel.attachmentsList.addAll(attachments)
     }
 
-    @SuppressLint("ScheduleExactAlarm")
+    @SuppressLint("ScheduleExactAlarm", "SetTextI18n")
     private fun setup() {
         titleInput = findViewById(R.id.addTitleInput)
         descriptionInput = findViewById(R.id.addDescriptionInput)
@@ -153,12 +132,13 @@ class AddTask : AppCompatActivity() {
         notificationTimeLabel = findViewById(R.id.addNotificationTimeLabel)
         notificationIcon = findViewById(R.id.notificationButtonIcon)
 
-        if (!notificationTime.isBlank()) notificationTimeField.text = notificationTime
-        if (!notificationDate.isBlank()) notificationDateField.text = notificationDate
-        if (!planedTime.isBlank()) planedTimeField.text = planedTime
-        if (!planedDate.isBlank()) planedDateField.text = planedDate
-        titleInput.setText(title)
-        descriptionInput.setText(description)
+        notificationTimeField.text = viewModel.notificationTime
+        notificationDateField.text = viewModel.notificationDate
+        planedTimeField.text = viewModel.planedTime
+        planedDateField.text = viewModel.planedDate
+        titleInput.setText(viewModel.title)
+        descriptionInput.setText(viewModel.description)
+
         if(currentTaskId != -1) addTaskButton.text = "Zapisz"
 
 
@@ -187,12 +167,12 @@ class AddTask : AppCompatActivity() {
                 createTime = currentTime,
                 endDate = null,
                 endTime = null,
-                planedDate = planedDate,
-                planedTime = planedTime,
+                planedDate = viewModel.planedDate,
+                planedTime = viewModel.planedTime,
                 category = category,
-                notificationDate = if (notificationOn && notificationDate.isNotEmpty()) notificationDate else null,
-                notificationTime = if (notificationOn && notificationTime.isNotEmpty()) notificationTime else null,
-                hasAttachments = hasAttachment,
+                notificationDate = if (viewModel.notificationOn && viewModel.notificationDate.isNotEmpty()) viewModel.notificationDate else null,
+                notificationTime = if (viewModel.notificationOn && viewModel.notificationTime.isNotEmpty()) viewModel.notificationTime else null,
+                hasAttachments = viewModel.hasAttachment,
                 isDone = false
             )
 
@@ -200,12 +180,12 @@ class AddTask : AppCompatActivity() {
                 newTask.id = currentTaskId
                 val result = dbManager.updateTask(newTask)
                 if (result > -1) {
-                    for(i in 0 until attachmentsList.size){
-                        if(attachmentsList[i].taskId != -1) continue
-                        attachmentsList[i].taskId = result.toInt()
-                        val attachmentResult = dbManager.insertAttachment(attachmentsList[i])
+                    for(i in 0 until viewModel.attachmentsList.size){
+                        if(viewModel.attachmentsList[i].taskId != -1) continue
+                        viewModel.attachmentsList[i].taskId = result.toInt()
+                        val attachmentResult = dbManager.insertAttachment(viewModel.attachmentsList[i])
                         if(attachmentResult < 0){
-                            Toast.makeText(this, "Nie udało sie dodać załącznika ${attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this, "Nie udało sie dodać załącznika ${viewModel.attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
                         }
                     }
                     notificationScheduler.scheduleNotification(newTask)
@@ -221,11 +201,11 @@ class AddTask : AppCompatActivity() {
             val result = dbManager.insertTask(newTask)
 
             if (result > -1) {
-                for(i in 0 until attachmentsList.size){
-                    attachmentsList[i].taskId = result.toInt()
-                    val attachmentResult = dbManager.insertAttachment(attachmentsList[i])
+                for(i in 0 until viewModel.attachmentsList.size){
+                    viewModel.attachmentsList[i].taskId = result.toInt()
+                    val attachmentResult = dbManager.insertAttachment(viewModel.attachmentsList[i])
                     if(attachmentResult < 0){
-                        Toast.makeText(this, "Nie udało sie dodać załącznika ${attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Nie udało sie dodać załącznika ${viewModel.attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
                     }
                 }
                 newTask.id = result.toInt()
@@ -239,7 +219,7 @@ class AddTask : AppCompatActivity() {
         }
 
         notificationsButton.setOnClickListener {
-            notificationOn = !notificationOn
+            viewModel.notificationOn = !viewModel.notificationOn
             setVisibilityNotification()
         }
 
@@ -259,7 +239,7 @@ class AddTask : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun setVisibilityNotification(){
-        val visibility = if (notificationOn) VISIBLE else GONE
+        val visibility = if (viewModel.notificationOn) VISIBLE else GONE
 
         notificationDateLabel.visibility = visibility
         notificationTimeLabel.visibility = visibility
@@ -268,7 +248,7 @@ class AddTask : AppCompatActivity() {
         timeNotificationInput.visibility = visibility
         dateNotificationInput.visibility = visibility
 
-        if(notificationOn){
+        if(viewModel.notificationOn){
             notificationsButton.text = "Włączone"
             notificationsButton.setTextColor(ContextCompat.getColor(this, R.color.add_task_background))
             notificationsButton.background = ContextCompat.getDrawable(this, R.drawable.notifications_button)
@@ -281,11 +261,11 @@ class AddTask : AppCompatActivity() {
             notificationIcon.setImageResource(R.drawable.no_notification)
         }
 
-        if(!notificationOn && (notificationTime != "" || notificationDate != "")){
-            notificationTime = ""
-            notificationDate = ""
-            notificationTimeField.text = notificationTime
-            notificationDateField.text = notificationDate
+        if(!viewModel.notificationOn && (viewModel.notificationTime != "" || viewModel.notificationDate != "")){
+            viewModel.notificationTime = "Wybierz godzinę"
+            viewModel.notificationDate = "Wybierz datę"
+            notificationTimeField.text = viewModel.notificationTime
+            notificationDateField.text = viewModel.notificationDate
             if(currentTaskId != -1){
                 task.notificationDate = null
                 task.notificationTime = null
@@ -311,17 +291,17 @@ class AddTask : AppCompatActivity() {
     }
 
     private fun validateDate(): Boolean {
-        if (planedDate == "") {
+        if (viewModel.planedDate  == "") {
             Toast.makeText(this, "Nie wybrałeś daty!", Toast.LENGTH_SHORT).show()
             return false
         }
-        if (planedTime == "") {
+        if (viewModel.planedTime == "") {
             Toast.makeText(this, "Nie wybrałeś godziny!", Toast.LENGTH_SHORT).show()
             return false
         }
         try {
             val formatter = DateTimeFormatter.ofPattern("d/M/yyyy H:mm")
-            val selectedDateTime = LocalDateTime.parse("$planedDate $planedTime", formatter)
+            val selectedDateTime = LocalDateTime.parse("${viewModel.planedDate} ${viewModel.planedTime}", formatter)
             val now = LocalDateTime.now()
 
             if (selectedDateTime.isBefore(now)) {
@@ -329,15 +309,15 @@ class AddTask : AppCompatActivity() {
                 return false
             }
 
-            if (notificationDate.isNotEmpty()) {
-                if (notificationTime.isEmpty()) {
+            if (viewModel.notificationDate.isNotEmpty()) {
+                if (viewModel.notificationTime.isEmpty()) {
                     Toast.makeText(this, "Nie wybrano godziny powiadomienia!", Toast.LENGTH_SHORT)
                         .show()
                     return false
                 }
 
                 val notificationDateTime =
-                    LocalDateTime.parse("$notificationDate $notificationTime", formatter)
+                    LocalDateTime.parse("${viewModel.notificationDate} ${viewModel.notificationTime}", formatter)
 
                 if (notificationDateTime.isBefore(now)) {
                     Toast.makeText(
@@ -357,7 +337,7 @@ class AddTask : AppCompatActivity() {
                     return false
                 }
             } else {
-                if (notificationTime.isNotEmpty()) {
+                if (viewModel.notificationTime.isNotEmpty()) {
                     Toast.makeText(this, "Nie wybrano daty powiadomienia!", Toast.LENGTH_SHORT)
                         .show()
                     return false
@@ -383,11 +363,11 @@ class AddTask : AppCompatActivity() {
             { _, selectedYear, selectedMonth, selectedDay ->
                 val d = "$selectedDay/${selectedMonth + 1}/$selectedYear"
                 if (isNotification) {
-                    notificationDate = d
-                    notificationDateField.text = notificationDate
+                    viewModel.notificationDate = d
+                    notificationDateField.text = viewModel.notificationDate
                 } else {
-                    planedDate = d
-                    planedDateField.text = d
+                    viewModel.planedDate = d
+                    planedDateField.text = viewModel.planedDate
                 }
             },
             year, month, day
@@ -408,11 +388,11 @@ class AddTask : AppCompatActivity() {
             { _, selectedHour, selectedMinute ->
                 val t = String.format("%02d:%02d", selectedHour, selectedMinute)
                 if (isNotification) {
-                    notificationTime = t
-                    notificationTimeField.text = notificationTime
+                    viewModel.notificationTime = t
+                    notificationTimeField.text = viewModel.notificationTime
                 } else {
-                    planedTime = t
-                    planedTimeField.text = t
+                    viewModel.planedTime = t
+                    planedTimeField.text = viewModel.planedTime
                 }
             },
             hour, minute, true
@@ -460,21 +440,6 @@ class AddTask : AppCompatActivity() {
             .show()
     }
 
-    private fun fillFields() {
-        title = task.title
-        description = task.description
-        planedDate = task.planedDate
-        planedTime = task.planedTime
-        if(task.notificationTime != null && task.notificationDate != null){
-            notificationTime = task.notificationTime.toString()
-            notificationDate = task.notificationDate.toString()
-            notificationOn = true
-        }
-        if (task.notificationTime != null) notificationTime = task.notificationTime ?: ""
-        if (task.notificationDate != null) notificationDate = task.notificationDate ?: ""
-        category = task.category
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -506,8 +471,8 @@ class AddTask : AppCompatActivity() {
             format = mimeType,
             localPath = destinationFile.absolutePath
         )
-        attachmentsList.add(attachment)
-        if(attachmentsList.isNotEmpty()) hasAttachment = true
+        viewModel.attachmentsList.add(attachment)
+        if(viewModel.attachmentsList.isNotEmpty()) viewModel.hasAttachment = true
         addAttachmentView(attachment)
     }
 
@@ -532,8 +497,8 @@ class AddTask : AppCompatActivity() {
             if(attachment.taskId != -1){
                 dbManager.deleteAttachmentById(attachment.id)
             }
-            attachmentsList.remove(attachment)
-            if(attachmentsList.isEmpty()) hasAttachment = false
+            viewModel.attachmentsList.remove(attachment)
+            if(viewModel.attachmentsList.isEmpty()) viewModel.hasAttachment = false
         }
 
         attachmentField.addView(view)
@@ -585,4 +550,3 @@ class AddTask : AppCompatActivity() {
         }
     }
 }
-

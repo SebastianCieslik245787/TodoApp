@@ -13,4 +13,9 @@
     <dimen name="text_size_input_label">18sp</dimen>
     <dimen name="height_button">50dp</dimen>
     <dimen name="text_size_button">18sp</dimen>
+    <dimen name="height_query">50dp</dimen>
+    <dimen name="width_query">0.72</dimen>
+    <dimen name="width_select_filter">0.4</dimen>
+    <dimen name="margin_top_select_filter_icon">13dp</dimen>
+    <dimen name="button_add_task">30dp</dimen>
 </resources>

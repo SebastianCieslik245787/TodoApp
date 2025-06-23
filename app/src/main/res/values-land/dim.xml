@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="height_query">40dp</dimen>
+    <dimen name="width_query">0.87</dimen>
+    <dimen name="width_select_filter">0.45</dimen>
+    <dimen name="margin_top_select_filter_icon">8dp</dimen>
+    <dimen name="margin_start_input_label">70dp</dimen>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#6A6969</color>
+    <color name="stroke">#485892</color>
+    <color name="add_task_background">#282828</color>
+    <color name="input_text_color">#FFFFFF</color>
+</resources>
