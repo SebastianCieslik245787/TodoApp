@@ -2,6 +2,10 @@ package com.example.todoapp
 
 import android.content.ContentValues
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import android.util.Log
+import java.io.File
+import androidx.core.database.sqlite.transaction
 
 class DatabaseManager(private val dbHelper: DatabaseHelper) {
     fun insertTask(task: Task): Long {
@@ -151,9 +155,6 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
             } while (cursor.moveToNext())
         }
 
-        cursor.close()
-        db.close()
-
         return attachments
     }
 
@@ -189,15 +190,46 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
 
     fun deleteTaskById(id: Int): Boolean {
         val db = dbHelper.writableDatabase
-        val result = db.delete(DatabaseHelper.TABLE_TASKS, "id = ?", arrayOf(id.toString()))
-        db.close()
-        return result > 0
+        var success = false
+        try {
+            db.transaction {
+                deleteAttachmentsByTaskId(this, id)
+
+                val result = delete(DatabaseHelper.TABLE_TASKS, "${DatabaseHelper.COLUMN_ID} = ?", arrayOf(id.toString()))
+                if (result > 0) {
+                    success = true
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("DatabaseManager", "Transakcja usuwania zadania $id nie powiodła się", e)
+            success = false
+        }
+        return success
     }
 
     fun deleteAttachmentById(id: Int): Boolean {
         val db = dbHelper.writableDatabase
-        val result = db.delete(DatabaseHelper.TABLE_ATTACHMENTS, "id = ?", arrayOf(id.toString()))
+        val result = db.delete(DatabaseHelper.TABLE_ATTACHMENTS, "${DatabaseHelper.COLUMN_ID} = ?", arrayOf(id.toString()))
         db.close()
         return result > 0
+    }
+
+    private fun deleteAttachmentsByTaskId(db: SQLiteDatabase, taskId: Int) {
+        val attachmentsToDelete = getAttachmentsForTask(taskId)
+
+        val deletedRows = db.delete(DatabaseHelper.TABLE_ATTACHMENTS, "${DatabaseHelper.COLUMN_TASK_ID} = ?", arrayOf(taskId.toString()))
+
+        if (deletedRows > 0) {
+            attachmentsToDelete.forEach { attachment ->
+                try {
+                    val file = File(attachment.localPath)
+                    if (file.exists()) {
+                        file.delete()
+                    }
+                } catch (e: Exception) {
+                    Log.e("DatabaseManager", "Nie udało się usunąć pliku: ${attachment.localPath}", e)
+                }
+            }
+        }
     }
 }

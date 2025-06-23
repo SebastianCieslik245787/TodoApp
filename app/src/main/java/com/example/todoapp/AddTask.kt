@@ -66,6 +66,7 @@ class AddTask : AppCompatActivity() {
     private var category: String = "Wybierz kategorię"
 
     private var notificationOn: Boolean = false
+    private var hasAttachment: Boolean = false
 
     private lateinit var dbManager: DatabaseManager
 
@@ -89,6 +90,8 @@ class AddTask : AppCompatActivity() {
 
         if (currentTaskId != -1) {
             task = dbManager.getTaskById(currentTaskId)
+            attachmentsList = dbManager.getAttachmentsForTask(task.id) as MutableList<Attachment>
+            if(attachmentsList.isNotEmpty()) hasAttachment = true
         } else {
             savedInstanceState?.let {
                 category = it.getString("category", "Wybierz kategorię...")
@@ -99,12 +102,14 @@ class AddTask : AppCompatActivity() {
                 title = it.getString("title", "")
                 description = it.getString("description", "")
                 notificationOn = it.getBoolean("notificationOn", false)
+                hasAttachment = it.getBoolean("hasAttachment", false)
             }
         }
 
         if (currentTaskId != -1) fillFields()
         setup()
         setVisibilityNotification()
+        for (i in attachmentsList) addAttachmentView(i)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -117,6 +122,7 @@ class AddTask : AppCompatActivity() {
         outState.putString("planedDate", planedDate)
         outState.putString("planedTime", planedTime)
         outState.putBoolean("notificationOn", notificationOn)
+        outState.putBoolean("hasAttachment", hasAttachment)
     }
 
     private fun setup() {
@@ -148,6 +154,8 @@ class AddTask : AppCompatActivity() {
         if (!planedDate.isBlank()) planedDateField.text = planedDate
         titleInput.setText(title)
         descriptionInput.setText(description)
+        if(currentTaskId != -1) addTaskButton.text = "Zapisz"
+
 
         addTaskButton.setOnClickListener {
             val title: String = titleInput.text.toString()
@@ -179,7 +187,7 @@ class AddTask : AppCompatActivity() {
                 category = category,
                 notificationDate = if (notificationDate.isNotEmpty()) notificationDate else null,
                 notificationTime = if (notificationTime.isNotEmpty()) notificationTime else null,
-                hasAttachments = false,
+                hasAttachments = hasAttachment,
                 isDone = false
             )
 
@@ -187,6 +195,14 @@ class AddTask : AppCompatActivity() {
                 newTask.id = currentTaskId
                 val result = dbManager.updateTask(newTask)
                 if (result > -1) {
+                    for(i in 0 until attachmentsList.size){
+                        if(attachmentsList[i].taskId != -1) continue
+                        attachmentsList[i].taskId = result.toInt()
+                        val attachmentResult = dbManager.insertAttachment(attachmentsList[i])
+                        if(attachmentResult < 0){
+                            Toast.makeText(this, "Nie udało sie dodać załącznika ${attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
+                        }
+                    }
                     Toast.makeText(this, "Zadanie edytowano pomyślnie!", Toast.LENGTH_LONG).show()
                     finish()
                 } else {
@@ -199,6 +215,13 @@ class AddTask : AppCompatActivity() {
             val result = dbManager.insertTask(newTask)
 
             if (result > -1) {
+                for(i in 0 until attachmentsList.size){
+                    attachmentsList[i].taskId = result.toInt()
+                    val attachmentResult = dbManager.insertAttachment(attachmentsList[i])
+                    if(attachmentResult < 0){
+                        Toast.makeText(this, "Nie udało sie dodać załącznika ${attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
+                    }
+                }
                 Toast.makeText(this, "Zadanie dodane pomyślnie!", Toast.LENGTH_LONG).show()
                 finish()
             } else {
@@ -253,6 +276,8 @@ class AddTask : AppCompatActivity() {
         if(!notificationOn && (notificationTime != "" || notificationDate != "")){
             notificationTime = ""
             notificationDate = ""
+            notificationTimeField.text = notificationTime
+            notificationDateField.text = notificationDate
             if(currentTaskId != -1){
                 task.notificationDate = null
                 task.notificationTime = null
@@ -432,6 +457,11 @@ class AddTask : AppCompatActivity() {
         description = task.description
         planedDate = task.planedDate
         planedTime = task.planedTime
+        if(task.notificationTime != null && task.notificationDate != null){
+            notificationTime = task.notificationTime.toString()
+            notificationDate = task.notificationDate.toString()
+            notificationOn = true
+        }
         if (task.notificationTime != null) notificationTime = task.notificationTime ?: ""
         if (task.notificationDate != null) notificationDate = task.notificationDate ?: ""
         category = task.category
@@ -469,6 +499,7 @@ class AddTask : AppCompatActivity() {
             localPath = destinationFile.absolutePath
         )
         attachmentsList.add(attachment)
+        if(attachmentsList.isNotEmpty()) hasAttachment = true
         addAttachmentView(attachment)
     }
 
@@ -489,8 +520,12 @@ class AddTask : AppCompatActivity() {
             if (file.exists()) file.delete()
 
             attachmentField.removeView(view)
+
+            if(attachment.taskId != -1){
+                dbManager.deleteAttachmentById(attachment.id)
+            }
             attachmentsList.remove(attachment)
-            //TODO USUŃ Z BAZY JAK BEDZIE EDIT
+            if(attachmentsList.isEmpty()) hasAttachment = false
         }
 
         attachmentField.addView(view)

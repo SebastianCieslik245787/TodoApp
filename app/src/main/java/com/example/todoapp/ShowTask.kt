@@ -2,16 +2,21 @@ package com.example.todoapp
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.content.edit
+import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -32,6 +37,7 @@ class ShowTask : AppCompatActivity() {
     private lateinit var attachmentsField: LinearLayout
 
     private lateinit var task: Task
+    private var attachments: List<Attachment> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +51,8 @@ class ShowTask : AppCompatActivity() {
 
         if (taskId != -1) {
             task = dbManager.getTaskById(taskId)
+            attachments = dbManager.getAttachmentsForTask(task.id)
+            Log.d("TaskID", "${task.id} ${attachments.size}")
         }
 
         setup()
@@ -54,6 +62,8 @@ class ShowTask : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         task = dbManager.getTaskById(task.id)
+        attachments = dbManager.getAttachmentsForTask(task.id)
+
         fillFields()
     }
 
@@ -103,7 +113,7 @@ class ShowTask : AppCompatActivity() {
             val intent = Intent(this, AddTask::class.java)
             startActivity(intent)
         }
-        attachmentsField = findViewById(R.id.attachmentField)
+        attachmentsField = findViewById(R.id.AttachmentsField)
     }
 
     private fun setActiveTaskIndex() {
@@ -124,6 +134,7 @@ class ShowTask : AppCompatActivity() {
             .show()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun fillFields(){
         titleField.text = task.title
         categoryField.text = "Kategoria: ${task.category}"
@@ -133,12 +144,64 @@ class ShowTask : AppCompatActivity() {
             notificationDateField.text =
                 "Powiadomienie: ${task.notificationDate} ${task.notificationTime}"
             notificationDateField.visibility = VISIBLE
+        } else {
+            notificationDateField.visibility = GONE
         }
         createdDateField.text = "Utworzono ${task.createDate} ${task.createTime}"
         if (task.isDone) {
             endDateField.text = "Zakończono: ${task.endDate} ${task.endTime}"
             endDateField.visibility = VISIBLE
             endButton.visibility = GONE
+        } else {
+            endDateField.visibility = GONE
+            endButton.visibility = VISIBLE
+        }
+
+        attachmentsField.removeAllViews()
+
+        for (attachment in attachments){
+            Log.d("ShowTask", "Dodaję widok dla załącznika: ${attachment.fileName}")
+            addAttachmentView(attachment)
+        }
+    }
+
+    private fun addAttachmentView(attachment: Attachment) {
+        val view = layoutInflater.inflate(R.layout.attachment, attachmentsField, false)
+
+        val attachmentName: TextView = view.findViewById(R.id.attachmentName)
+        val deleteAttachmentButton: ImageView = view.findViewById(R.id.deleteAttachmentIcon)
+        deleteAttachmentButton.visibility = GONE
+        attachmentName.text = attachment.fileName
+
+        attachmentName.setOnClickListener {
+            openFile(attachment.localPath, attachment.format)
+        }
+
+        attachmentsField.addView(view)
+    }
+
+    private fun openFile(filePath: String, mimeType: String) {
+        val file = File(filePath)
+        if (!file.exists()) {
+            Toast.makeText(this, "Plik nie istnieje!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            file
+        )
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, mimeType)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        try {
+            startActivity(Intent.createChooser(intent, "Otwórz za pomocą..."))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT).show()
         }
     }
 }

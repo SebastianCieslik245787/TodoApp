@@ -13,6 +13,6 @@ data class Task(
     val category: String,
     var notificationDate : String?,
     var notificationTime : String?,
-    val hasAttachments : Boolean,
+    var hasAttachments : Boolean,
     var isDone : Boolean
 )
