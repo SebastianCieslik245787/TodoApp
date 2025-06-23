@@ -3,7 +3,6 @@ package com.example.todoapp
 import android.content.ContentValues
 import android.database.Cursor
 import android.util.Log
-import android.widget.Toast
 
 class DatabaseManager(private val dbHelper: DatabaseHelper) {
     fun insertTask(task: Task): Long {
@@ -125,5 +124,12 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
             selection,
             selectionArgs
         )
+    }
+
+    fun deleteTaskById(id: Int): Boolean {
+        val db = dbHelper.writableDatabase
+        val result = db.delete(DatabaseHelper.TABLE_TASKS, "id = ?", arrayOf(id.toString()))
+        db.close()
+        return result > 0
     }
 }

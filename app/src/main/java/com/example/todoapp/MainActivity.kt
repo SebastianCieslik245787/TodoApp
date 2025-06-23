@@ -43,8 +43,10 @@ class MainActivity : AppCompatActivity() {
     private fun setup(){
         dbManager = DatabaseManager(DatabaseHelper(this))
         fab = findViewById(R.id.fab)
-        fab.setOnClickListener { val intent = Intent(this, AddTask::class.java)
-            startActivity(intent) }
+        fab.setOnClickListener {
+            val intent = Intent(this, AddTask::class.java)
+            startActivity(intent)
+        }
 
         tasksField = findViewById(R.id.recyclerViewTasks)
         tasksField.layoutManager = LinearLayoutManager(this)

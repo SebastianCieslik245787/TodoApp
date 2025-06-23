@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import kotlin.properties.Delegates
 
 class AddTask : AppCompatActivity() {
     private lateinit var titleInput: EditText
@@ -36,18 +37,24 @@ class AddTask : AppCompatActivity() {
     private lateinit var planedTimeField: TextView
     private lateinit var addAttachmentButton: TextView
     private lateinit var attachmentField: LinearLayout
-    private lateinit var backButton : ImageView
+    private lateinit var backButton: ImageView
 
-    private var notificationTime : String = ""
-    private var notificationDate : String = ""
+    private var notificationTime: String = ""
+    private var notificationDate: String = ""
 
-    private var planedTime : String = ""
-    private var planedDate : String = ""
+    private var planedTime: String = ""
+    private var planedDate: String = ""
+
+    private var title: String = ""
+    private var description: String = ""
 
     private lateinit var categorySpinner: Spinner
-    private var category : String = "Wybierz kategorię..."
+    private var category: String = "Wybierz kategorię..."
 
     private lateinit var dbManager: DatabaseManager
+
+    private lateinit var task: Task
+    private var currentTaskId by Delegates.notNull<Int>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,14 +64,24 @@ class AddTask : AppCompatActivity() {
 
         dbManager = DatabaseManager(DatabaseHelper(this))
 
-        savedInstanceState?.let {
-            category = it.getString("category", "Wybierz kategorię...")
-            notificationDate = it.getString("notificationDate", "")
-            notificationTime = it.getString("notificationTime", "")
-            planedDate = it.getString("planedDate", "")
-            planedTime = it.getString("planedTime", "")
+        val prefs = getSharedPreferences("task_prefs", MODE_PRIVATE)
+        currentTaskId = prefs.getInt("selected_task_id", -1)
+
+        if (currentTaskId != -1) {
+            task = dbManager.getTaskById(currentTaskId)
+        } else {
+            savedInstanceState?.let {
+                category = it.getString("category", "Wybierz kategorię...")
+                notificationDate = it.getString("notificationDate", "")
+                notificationTime = it.getString("notificationTime", "")
+                planedDate = it.getString("planedDate", "")
+                planedTime = it.getString("planedTime", "")
+                title = it.getString("title", "")
+                description = it.getString("description", "")
+            }
         }
 
+        fillFields()
         setup()
     }
 
@@ -100,10 +117,12 @@ class AddTask : AppCompatActivity() {
         backButton.setOnClickListener { showDiscardChangesDialog() }
 
 
-        if(!notificationTime.isBlank()) notificationTimeField.text = notificationTime
-        if(!notificationDate.isBlank()) notificationDateField.text = notificationDate
-        if(!planedTime.isBlank()) planedTimeField.text = planedTime
-        if(!planedDate.isBlank()) planedDateField.text = planedDate
+        if (!notificationTime.isBlank()) notificationTimeField.text = notificationTime
+        if (!notificationDate.isBlank()) notificationDateField.text = notificationDate
+        if (!planedTime.isBlank()) planedTimeField.text = planedTime
+        if (!planedDate.isBlank()) planedDateField.text = planedDate
+        titleInput.setText(title)
+        descriptionInput.setText(description)
 
         addTaskButton.setOnClickListener {
             val title: String = titleInput.text.toString()
@@ -117,7 +136,8 @@ class AddTask : AppCompatActivity() {
 
             if (!validateText(title, "Nie wpisano tytułu!") ||
                 !validateText(description, "Nie wpisano opisu!") ||
-                !validateDate()
+                !validateDate() ||
+                !validateCategory()
             ) {
                 return@setOnClickListener
             }
@@ -131,12 +151,24 @@ class AddTask : AppCompatActivity() {
                 endTime = null,
                 planedDate = planedDate,
                 planedTime = planedTime,
-                category = "Ogólna",
+                category = category,
                 notificationDate = if (notificationDate.isNotEmpty()) notificationDate else null,
                 notificationTime = if (notificationTime.isNotEmpty()) notificationTime else null,
                 hasAttachments = false,
                 isDone = false
             )
+
+            if(currentTaskId != -1){
+                newTask.id = currentTaskId
+                val result = dbManager.updateTask(newTask)
+                if (result > -1) {
+                    Toast.makeText(this, "Zadanie edytowano pomyślnie!", Toast.LENGTH_LONG).show()
+                    finish()
+                } else {
+                    Toast.makeText(this, "Błąd podczas edytowania zadania.", Toast.LENGTH_LONG).show()
+                }
+                return@setOnClickListener
+            }
 
             val result = dbManager.insertTask(newTask)
 
@@ -155,6 +187,10 @@ class AddTask : AppCompatActivity() {
         planedTimeInput.setOnClickListener { showTimePickerDialog(false) }
     }
 
+    private fun validateCategory(): Boolean {
+        return category != "Wybierz kategorię..."
+    }
+
     private fun validateText(text: String, message: String): Boolean {
         if (text.isBlank()) {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -168,7 +204,7 @@ class AddTask : AppCompatActivity() {
             Toast.makeText(this, "Nie wybrałeś daty!", Toast.LENGTH_SHORT).show()
             return false
         }
-        if(planedTime == ""){
+        if (planedTime == "") {
             Toast.makeText(this, "Nie wybrałeś godziny!", Toast.LENGTH_SHORT).show()
             return false
         }
@@ -184,7 +220,8 @@ class AddTask : AppCompatActivity() {
 
             if (notificationDate.isNotEmpty()) {
                 if (notificationTime.isEmpty()) {
-                    Toast.makeText(this, "Nie wybrano godziny powiadomienia!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Nie wybrano godziny powiadomienia!", Toast.LENGTH_SHORT)
+                        .show()
                     return false
                 }
 
@@ -192,18 +229,26 @@ class AddTask : AppCompatActivity() {
                     LocalDateTime.parse("$notificationDate $notificationTime", formatter)
 
                 if (notificationDateTime.isBefore(now)) {
-                    Toast.makeText(this, "Powiadomienie nie może być w przeszłości!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Powiadomienie nie może być w przeszłości!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return false
                 }
 
                 if (notificationDateTime.isAfter(selectedDateTime)) {
-                    Toast.makeText(this, "Powiadomienie nie może być później niż zaplanowana data!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Powiadomienie nie może być później niż zaplanowana data!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return false
                 }
-            }
-            else{
+            } else {
                 if (notificationTime.isNotEmpty()) {
-                    Toast.makeText(this, "Nie wybrano daty powiadomienia!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Nie wybrano daty powiadomienia!", Toast.LENGTH_SHORT)
+                        .show()
                     return false
                 }
             }
@@ -216,7 +261,7 @@ class AddTask : AppCompatActivity() {
         return true
     }
 
-    private fun showDatePickerDialog(isNotification : Boolean) {
+    private fun showDatePickerDialog(isNotification: Boolean) {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)
@@ -226,11 +271,10 @@ class AddTask : AppCompatActivity() {
             this,
             { _, selectedYear, selectedMonth, selectedDay ->
                 val d = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-                if(isNotification){
+                if (isNotification) {
                     notificationDate = d
                     notificationDateField.text = notificationDate
-                }
-                else{
+                } else {
                     planedDate = d
                     planedDateField.text = d
                 }
@@ -243,7 +287,7 @@ class AddTask : AppCompatActivity() {
     }
 
     @SuppressLint("DefaultLocale")
-    private fun showTimePickerDialog(isNotification : Boolean) {
+    private fun showTimePickerDialog(isNotification: Boolean) {
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val minute = calendar.get(Calendar.MINUTE)
@@ -252,11 +296,10 @@ class AddTask : AppCompatActivity() {
             this,
             { _, selectedHour, selectedMinute ->
                 val t = String.format("%02d:%02d", selectedHour, selectedMinute)
-                if(isNotification) {
+                if (isNotification) {
                     notificationTime = t
                     notificationTimeField.text = notificationTime
-                }
-                else {
+                } else {
                     planedTime = t
                     planedTimeField.text = t
                 }
@@ -267,7 +310,7 @@ class AddTask : AppCompatActivity() {
         timePickerDialog.show()
     }
 
-    private fun setSpinner(){
+    private fun setSpinner() {
         val adapter = ArrayAdapter.createFromResource(
             this,
             R.array.category_array,
@@ -281,7 +324,12 @@ class AddTask : AppCompatActivity() {
         categorySpinner.setSelection(spinnerPosition)
 
         categorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 val selectedCategory = parent.getItemAtPosition(position).toString()
                 category = selectedCategory
             }
@@ -299,6 +347,16 @@ class AddTask : AppCompatActivity() {
             }
             .setNegativeButton("Anuluj", null)
             .show()
+    }
+
+    private fun fillFields() {
+        title = task.title
+        description = task.description
+        planedDate = task.planedDate
+        planedTime = task.planedTime
+        if (task.notificationTime != null) notificationTime = task.notificationTime ?: ""
+        if (task.notificationDate != null) notificationDate = task.notificationDate ?: ""
+        category = task.category
     }
 }
 

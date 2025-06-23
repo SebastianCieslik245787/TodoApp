@@ -1,6 +1,8 @@
 package com.example.todoapp
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -47,38 +49,25 @@ class ShowTask : AppCompatActivity() {
         }
 
         setup()
+        fillFields()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        task = dbManager.getTaskById(task.id)
+        fillFields()
     }
 
     @SuppressLint("SetTextI18n")
     private fun setup() {
         titleField = findViewById(R.id.taskTitle)
-        titleField.text = task.title
-
         categoryField = findViewById(R.id.taskCategory)
-        categoryField.text = "Kategoria: ${task.category}"
-
         descriptionField = findViewById(R.id.taskDescription)
-        descriptionField.text = task.description
-
         planedDateField = findViewById(R.id.taskPlanedDate)
-        planedDateField.text = "Zaplanowano na: ${task.planedDate} ${task.planedTime}"
-
         notificationDateField = findViewById(R.id.taskNotificationDate)
-        if (task.notificationDate != null && task.notificationTime != null) {
-            notificationDateField.text = "Powiadomienie: ${task.notificationDate} ${task.notificationTime}"
-            notificationDateField.visibility = VISIBLE
-        }
-
         createdDateField = findViewById(R.id.taskCreatedDate)
-        createdDateField.text = "Utworzono ${task.createDate} ${task.createTime}"
-
         endDateField = findViewById(R.id.taskEndDate)
         endButton = findViewById(R.id.endTaskButton)
-        if (task.isDone) {
-            endDateField.text = "Zakończono: ${task.endDate} ${task.endTime}"
-            endDateField.visibility = VISIBLE
-            endButton.visibility = GONE
-        }
 
         endButton.setOnClickListener {
             val now = LocalDateTime.now()
@@ -101,24 +90,57 @@ class ShowTask : AppCompatActivity() {
 
         backButton = findViewById(R.id.taskBack)
         backButton.setOnClickListener {
-            setActiveTaskIndex(-1)
+            setActiveTaskIndex()
             finish()
         }
 
         deleteButton = findViewById(R.id.taskDelete)
         deleteButton.setOnClickListener {
-            //TODO usuwanie
-            setActiveTaskIndex(-1)
-            finish()
+            showDeleteTaskDialog()
         }
 
         editButton = findViewById(R.id.taskEdit)
+        editButton.setOnClickListener {
+            val intent = Intent(this, AddTask::class.java)
+            startActivity(intent)
+        }
         toggleNotificationButton = findViewById(R.id.taskNotifications)
         attachmentsField = findViewById(R.id.attachmentField)
     }
 
-    private fun setActiveTaskIndex(index : Int){
+    private fun setActiveTaskIndex() {
         val sharedPref = getSharedPreferences("task_prefs", MODE_PRIVATE)
-        sharedPref.edit { putInt("selected_task_id", index) }
+        sharedPref.edit { putInt("selected_task_id", -1) }
+    }
+
+    private fun showDeleteTaskDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Usunąć zadanie?")
+            .setMessage("Czy na pewno chcesz usunąć zadanie?")
+            .setPositiveButton("Usuń") { _, _ ->
+                dbManager.deleteTaskById(task.id)
+                setActiveTaskIndex()
+                finish()
+            }
+            .setNegativeButton("Anuluj", null)
+            .show()
+    }
+
+    private fun fillFields(){
+        titleField.text = task.title
+        categoryField.text = "Kategoria: ${task.category}"
+        descriptionField.text = task.description
+        planedDateField.text = "Zaplanowano na: ${task.planedDate} ${task.planedTime}"
+        if (task.notificationDate != null && task.notificationTime != null) {
+            notificationDateField.text =
+                "Powiadomienie: ${task.notificationDate} ${task.notificationTime}"
+            notificationDateField.visibility = VISIBLE
+        }
+        createdDateField.text = "Utworzono ${task.createDate} ${task.createTime}"
+        if (task.isDone) {
+            endDateField.text = "Zakończono: ${task.endDate} ${task.endTime}"
+            endDateField.visibility = VISIBLE
+            endButton.visibility = GONE
+        }
     }
 }
