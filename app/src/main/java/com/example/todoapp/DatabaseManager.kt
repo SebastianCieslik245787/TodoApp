@@ -23,6 +23,7 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
             put(DatabaseHelper.COLUMN_NOTIFICATION_DATE, task.notificationDate)
             put(DatabaseHelper.COLUMN_NOTIFICATION_TIME, task.notificationTime)
             put(DatabaseHelper.COLUMN_HAS_ATTACHMENTS, if (task.hasAttachments) 1 else 0)
+            put(DatabaseHelper.COLUMN_NOTIFICATION_ON, if (task.notificationOn) 1 else 0)
         }
         return db.insert(DatabaseHelper.TABLE_TASKS, null, values)
     }
@@ -53,7 +54,8 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
             notificationDate = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NOTIFICATION_DATE)),
             notificationTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NOTIFICATION_TIME)),
             hasAttachments = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_HAS_ATTACHMENTS)) == 1,
-            isDone = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_IS_DONE)) == 1
+            isDone = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_IS_DONE)) == 1,
+            notificationOn = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NOTIFICATION_ON)) == 1
         )
     }
 
@@ -175,6 +177,7 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
             put(DatabaseHelper.COLUMN_NOTIFICATION_TIME, task.notificationTime)
             put(DatabaseHelper.COLUMN_HAS_ATTACHMENTS, if (task.hasAttachments) 1 else 0)
             put(DatabaseHelper.COLUMN_IS_DONE, if (task.isDone) 1 else 0)
+            put(DatabaseHelper.COLUMN_NOTIFICATION_ON, if (task.notificationOn) 1 else 0)
         }
 
         val selection = "${DatabaseHelper.COLUMN_ID} = ?"

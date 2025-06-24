@@ -9,7 +9,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "task_manager.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
 
         const val TABLE_TASKS = "tasks"
         const val TABLE_ATTACHMENTS = "attachments"
@@ -32,6 +32,7 @@ class DatabaseHelper(context: Context) :
         const val COLUMN_NOTIFICATION_TIME = "notification_time"
         const val COLUMN_HAS_ATTACHMENTS = "has_attachments"
         const val COLUMN_IS_DONE = "is_done"
+        const val COLUMN_NOTIFICATION_ON = "notification_on"
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -50,7 +51,8 @@ class DatabaseHelper(context: Context) :
                 $COLUMN_NOTIFICATION_DATE TEXT,
                 $COLUMN_NOTIFICATION_TIME TEXT,
                 $COLUMN_HAS_ATTACHMENTS INTEGER DEFAULT 0,
-                $COLUMN_IS_DONE INTEGER DEFAULT 0
+                $COLUMN_IS_DONE INTEGER DEFAULT 0,
+                $COLUMN_NOTIFICATION_ON INTEGER DEFAULT 0
             )
         """.trimIndent()
         db?.execSQL(createTable)

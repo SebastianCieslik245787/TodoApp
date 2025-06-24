@@ -93,8 +93,10 @@ class ShowTask : AppCompatActivity() {
             task.endTime = currentTime
             task.endDate = currentDate
             task.isDone = true
+            task.notificationOn = false
 
             dbManager.updateTask(task)
+            notificationScheduler.cancelNotification(task)
 
             endDateField.text = "Zakończono: $currentDate $currentTime"
             endDateField.visibility = VISIBLE

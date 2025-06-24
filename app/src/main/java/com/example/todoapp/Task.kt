@@ -14,5 +14,6 @@ data class Task(
     var notificationDate : String?,
     var notificationTime : String?,
     var hasAttachments : Boolean,
-    var isDone : Boolean
+    var isDone : Boolean,
+    var notificationOn : Boolean = false
 )

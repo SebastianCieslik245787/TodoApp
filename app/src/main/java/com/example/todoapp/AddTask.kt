@@ -139,7 +139,7 @@ class AddTask : AppCompatActivity() {
         titleInput.setText(viewModel.title)
         descriptionInput.setText(viewModel.description)
 
-        if(currentTaskId != -1) addTaskButton.text = "Zapisz"
+        if (currentTaskId != -1) addTaskButton.text = "Zapisz"
 
 
         addTaskButton.setOnClickListener {
@@ -170,22 +170,28 @@ class AddTask : AppCompatActivity() {
                 planedDate = viewModel.planedDate,
                 planedTime = viewModel.planedTime,
                 category = category,
-                notificationDate = if (viewModel.notificationOn && viewModel.notificationDate.isNotEmpty()) viewModel.notificationDate else null,
-                notificationTime = if (viewModel.notificationOn && viewModel.notificationTime.isNotEmpty()) viewModel.notificationTime else null,
+                notificationDate = if (viewModel.notificationOn && viewModel.notificationDate.isNotEmpty() && viewModel.notificationDate != "Wybierz datę") viewModel.notificationDate else null,
+                notificationTime = if (viewModel.notificationOn && viewModel.notificationTime.isNotEmpty() && viewModel.notificationTime != "Wybierz godzinę") viewModel.notificationTime else null,
                 hasAttachments = viewModel.hasAttachment,
-                isDone = false
+                isDone = false,
+                notificationOn = viewModel.notificationOn
             )
 
             if (currentTaskId != -1) {
                 newTask.id = currentTaskId
                 val result = dbManager.updateTask(newTask)
                 if (result > -1) {
-                    for(i in 0 until viewModel.attachmentsList.size){
-                        if(viewModel.attachmentsList[i].taskId != -1) continue
+                    for (i in 0 until viewModel.attachmentsList.size) {
+                        if (viewModel.attachmentsList[i].taskId != -1) continue
                         viewModel.attachmentsList[i].taskId = result.toInt()
-                        val attachmentResult = dbManager.insertAttachment(viewModel.attachmentsList[i])
-                        if(attachmentResult < 0){
-                            Toast.makeText(this, "Nie udało sie dodać załącznika ${viewModel.attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
+                        val attachmentResult =
+                            dbManager.insertAttachment(viewModel.attachmentsList[i])
+                        if (attachmentResult < 0) {
+                            Toast.makeText(
+                                this,
+                                "Nie udało sie dodać załącznika ${viewModel.attachmentsList[i].fileName}!",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
                     notificationScheduler.scheduleNotification(newTask)
@@ -201,11 +207,15 @@ class AddTask : AppCompatActivity() {
             val result = dbManager.insertTask(newTask)
 
             if (result > -1) {
-                for(i in 0 until viewModel.attachmentsList.size){
+                for (i in 0 until viewModel.attachmentsList.size) {
                     viewModel.attachmentsList[i].taskId = result.toInt()
                     val attachmentResult = dbManager.insertAttachment(viewModel.attachmentsList[i])
-                    if(attachmentResult < 0){
-                        Toast.makeText(this, "Nie udało sie dodać załącznika ${viewModel.attachmentsList[i].fileName}!", Toast.LENGTH_LONG).show()
+                    if (attachmentResult < 0) {
+                        Toast.makeText(
+                            this,
+                            "Nie udało sie dodać załącznika ${viewModel.attachmentsList[i].fileName}!",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
                 newTask.id = result.toInt()
@@ -228,7 +238,10 @@ class AddTask : AppCompatActivity() {
                 type = "*/*"
                 putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/pdf", "image/*"))
             }
-            startActivityForResult(Intent.createChooser(intent, "Wybierz plik"), PICK_FILE_REQUEST_CODE)
+            startActivityForResult(
+                Intent.createChooser(intent, "Wybierz plik"),
+                PICK_FILE_REQUEST_CODE
+            )
         }
 
         dateNotificationInput.setOnClickListener { showDatePickerDialog(true) }
@@ -238,7 +251,7 @@ class AddTask : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun setVisibilityNotification(){
+    private fun setVisibilityNotification() {
         val visibility = if (viewModel.notificationOn) VISIBLE else GONE
 
         notificationDateLabel.visibility = visibility
@@ -248,25 +261,31 @@ class AddTask : AppCompatActivity() {
         timeNotificationInput.visibility = visibility
         dateNotificationInput.visibility = visibility
 
-        if(viewModel.notificationOn){
+        if (viewModel.notificationOn) {
             notificationsButton.text = "Włączone"
-            notificationsButton.setTextColor(ContextCompat.getColor(this, R.color.add_task_background))
-            notificationsButton.background = ContextCompat.getDrawable(this, R.drawable.notifications_button)
+            notificationsButton.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.add_task_background
+                )
+            )
+            notificationsButton.background =
+                ContextCompat.getDrawable(this, R.drawable.notifications_button)
             notificationIcon.setImageResource(R.drawable.notification_addtask)
-        }
-        else{
+        } else {
             notificationsButton.text = "Wyłączone"
             notificationsButton.setTextColor(ContextCompat.getColor(this, R.color.stroke))
-            notificationsButton.background = ContextCompat.getDrawable(this, R.drawable.text_input_background)
+            notificationsButton.background =
+                ContextCompat.getDrawable(this, R.drawable.text_input_background)
             notificationIcon.setImageResource(R.drawable.no_notification)
         }
 
-        if(!viewModel.notificationOn && (viewModel.notificationTime != "" || viewModel.notificationDate != "")){
+        if (!viewModel.notificationOn && (viewModel.notificationTime != "" || viewModel.notificationDate != "")) {
             viewModel.notificationTime = "Wybierz godzinę"
             viewModel.notificationDate = "Wybierz datę"
             notificationTimeField.text = viewModel.notificationTime
             notificationDateField.text = viewModel.notificationDate
-            if(currentTaskId != -1){
+            if (currentTaskId != -1) {
                 task.notificationDate = null
                 task.notificationTime = null
                 dbManager.updateTask(task)
@@ -291,7 +310,7 @@ class AddTask : AppCompatActivity() {
     }
 
     private fun validateDate(): Boolean {
-        if (viewModel.planedDate  == "") {
+        if (viewModel.planedDate == "") {
             Toast.makeText(this, "Nie wybrałeś daty!", Toast.LENGTH_SHORT).show()
             return false
         }
@@ -301,7 +320,8 @@ class AddTask : AppCompatActivity() {
         }
         try {
             val formatter = DateTimeFormatter.ofPattern("d/M/yyyy H:mm")
-            val selectedDateTime = LocalDateTime.parse("${viewModel.planedDate} ${viewModel.planedTime}", formatter)
+            val selectedDateTime =
+                LocalDateTime.parse("${viewModel.planedDate} ${viewModel.planedTime}", formatter)
             val now = LocalDateTime.now()
 
             if (selectedDateTime.isBefore(now)) {
@@ -309,38 +329,47 @@ class AddTask : AppCompatActivity() {
                 return false
             }
 
-            if (viewModel.notificationDate.isNotEmpty()) {
-                if (viewModel.notificationTime.isEmpty()) {
-                    Toast.makeText(this, "Nie wybrano godziny powiadomienia!", Toast.LENGTH_SHORT)
-                        .show()
-                    return false
-                }
+            if (viewModel.notificationOn) {
+                if (viewModel.notificationDate.isNotEmpty() && viewModel.notificationDate != "Wybierz datę") {
+                    if (viewModel.notificationTime.isEmpty()) {
+                        Toast.makeText(
+                            this,
+                            "Nie wybrano godziny powiadomienia!",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        return false
+                    }
 
-                val notificationDateTime =
-                    LocalDateTime.parse("${viewModel.notificationDate} ${viewModel.notificationTime}", formatter)
+                    val notificationDateTime =
+                        LocalDateTime.parse(
+                            "${viewModel.notificationDate} ${viewModel.notificationTime}",
+                            formatter
+                        )
 
-                if (notificationDateTime.isBefore(now)) {
-                    Toast.makeText(
-                        this,
-                        "Powiadomienie nie może być w przeszłości!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return false
-                }
+                    if (notificationDateTime.isBefore(now)) {
+                        Toast.makeText(
+                            this,
+                            "Powiadomienie nie może być w przeszłości!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return false
+                    }
 
-                if (notificationDateTime.isAfter(selectedDateTime)) {
-                    Toast.makeText(
-                        this,
-                        "Powiadomienie nie może być później niż zaplanowana data!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return false
-                }
-            } else {
-                if (viewModel.notificationTime.isNotEmpty()) {
-                    Toast.makeText(this, "Nie wybrano daty powiadomienia!", Toast.LENGTH_SHORT)
-                        .show()
-                    return false
+                    if (notificationDateTime.isAfter(selectedDateTime)) {
+                        Toast.makeText(
+                            this,
+                            "Powiadomienie nie może być później niż zaplanowana data!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return false
+                    }
+                } else {
+                    if (viewModel.notificationTime.isNotEmpty() && viewModel.notificationTime != "Wybierz godzinę") {
+                        Toast.makeText(this, "Nie wybrano daty powiadomienia!", Toast.LENGTH_SHORT)
+                            .show()
+                        return false
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -472,7 +501,7 @@ class AddTask : AppCompatActivity() {
             localPath = destinationFile.absolutePath
         )
         viewModel.attachmentsList.add(attachment)
-        if(viewModel.attachmentsList.isNotEmpty()) viewModel.hasAttachment = true
+        if (viewModel.attachmentsList.isNotEmpty()) viewModel.hasAttachment = true
         addAttachmentView(attachment)
     }
 
@@ -494,11 +523,11 @@ class AddTask : AppCompatActivity() {
 
             attachmentField.removeView(view)
 
-            if(attachment.taskId != -1){
+            if (attachment.taskId != -1) {
                 dbManager.deleteAttachmentById(attachment.id)
             }
             viewModel.attachmentsList.remove(attachment)
-            if(viewModel.attachmentsList.isEmpty()) viewModel.hasAttachment = false
+            if (viewModel.attachmentsList.isEmpty()) viewModel.hasAttachment = false
         }
 
         attachmentField.addView(view)
@@ -546,7 +575,8 @@ class AddTask : AppCompatActivity() {
         try {
             startActivity(Intent.createChooser(intent, "Otwórz za pomocą..."))
         } catch (_: ActivityNotFoundException) {
-            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 }

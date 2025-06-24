@@ -31,6 +31,13 @@ class NotificationScheduler(private val context: Context) {
             return
         }
 
+        if (!task.notificationOn) {
+            Log.d(
+                "NotificationScheduler", "Powiadomienia zadania wyłączone. ${task.id}"
+            )
+            return
+        }
+
         val notificationTimeMillis = getNotificationTimeInMillis(task)
 
         if (notificationTimeMillis == null) {
