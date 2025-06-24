@@ -233,6 +233,7 @@ class AddTask : AppCompatActivity() {
             setVisibilityNotification()
         }
 
+        //Otwieranie dodaj załącznik
         addAttachmentButton.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "*/*"
@@ -372,9 +373,8 @@ class AddTask : AppCompatActivity() {
                     }
                 }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Toast.makeText(this, "Błąd formatu daty/godziny", Toast.LENGTH_SHORT).show()
-            Log.e("validateDate", "Błąd parsowania daty: ${e.message}")
             return false
         }
 
@@ -518,6 +518,7 @@ class AddTask : AppCompatActivity() {
         }
 
         deleteAttachmentButton.setOnClickListener {
+            //usuwanie załącznika
             val file = File(attachment.localPath)
             if (file.exists()) file.delete()
 
@@ -561,11 +562,7 @@ class AddTask : AppCompatActivity() {
             return
         }
 
-        val uri = FileProvider.getUriForFile(
-            this,
-            "${packageName}.fileprovider",
-            file
-        )
+        val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
 
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, mimeType)
@@ -575,8 +572,7 @@ class AddTask : AppCompatActivity() {
         try {
             startActivity(Intent.createChooser(intent, "Otwórz za pomocą..."))
         } catch (_: ActivityNotFoundException) {
-            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT).show()
         }
     }
 }

@@ -205,11 +205,7 @@ class ShowTask : AppCompatActivity() {
             return
         }
 
-        val uri = FileProvider.getUriForFile(
-            this,
-            "${packageName}.fileprovider",
-            file
-        )
+        val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
 
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, mimeType)
@@ -218,9 +214,9 @@ class ShowTask : AppCompatActivity() {
 
         try {
             startActivity(Intent.createChooser(intent, "Otwórz za pomocą..."))
-        } catch (_: ActivityNotFoundException) {
-            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT)
-                .show()
+        }
+        catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, "Brak aplikacji do otwarcia tego typu pliku!", Toast.LENGTH_SHORT).show()
         }
     }
 }

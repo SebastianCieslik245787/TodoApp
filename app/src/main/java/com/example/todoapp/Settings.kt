@@ -1,5 +1,6 @@
 package com.example.todoapp
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -25,6 +26,10 @@ class Settings : AppCompatActivity(){
     private var hours : String = ""
     private var minutes : String = ""
 
+    private lateinit var dbManager: DatabaseManager
+
+    private lateinit var notificationScheduler: NotificationScheduler
+
     private lateinit var sharedPref: SharedPreferences
 
 
@@ -32,6 +37,10 @@ class Settings : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.settings)
+
+        dbManager = DatabaseManager(DatabaseHelper(this))
+        notificationScheduler = NotificationScheduler(this)
+
         sharedPref = getSharedPreferences("settings", MODE_PRIVATE)
 
         hours = sharedPref.getString("hours", "0").toString()
@@ -56,6 +65,7 @@ class Settings : AppCompatActivity(){
         }
     }
 
+    @SuppressLint("ScheduleExactAlarm")
     private fun setup(){
         backButton = findViewById(R.id.settingsBackButton)
         backButton.setOnClickListener { finish() }
@@ -73,6 +83,12 @@ class Settings : AppCompatActivity(){
                 putString("minutes", minutes)
             }
             Toast.makeText(this, "Ustawienia zapisano", Toast.LENGTH_SHORT).show()
+            val tasks : List<Task> = dbManager.getTasks()
+            for(t in tasks){
+                if(t.notificationOn && t.notificationTime == null && t.notificationDate == null){
+                    notificationScheduler.scheduleNotification(t)
+                }
+            }
         }
 
         selectHourIcon = findViewById(R.id.selectHourInputIconSettings)

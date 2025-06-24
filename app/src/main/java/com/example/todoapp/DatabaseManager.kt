@@ -1,5 +1,6 @@
 package com.example.todoapp
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
@@ -124,6 +125,7 @@ class DatabaseManager(private val dbHelper: DatabaseHelper) {
         )
     }
 
+    @SuppressLint("Recycle")
     fun getAttachmentsForTask(taskId : Int) : List<Attachment>{
         val db = dbHelper.readableDatabase
         val attachments = mutableListOf<Attachment>()

@@ -37,9 +37,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var showDoneTaskButton: ImageView
     private lateinit var executeFiltersButton: TextView
 
-    private var category: String = "Wybierz kategorię..."
+    private var category: String = "Wybierz kategorię"
     private var query: String = ""
-    private var sorting: String = "Wybierz sortowanie..."
+    private var sorting: String = "Wybierz sortowanie"
     private var showDoneTasks: Boolean = false
     private var showDoneTasksFilter: Boolean = false
 
@@ -54,9 +54,9 @@ class MainActivity : AppCompatActivity() {
 
         val sharedPref = getSharedPreferences("filters", MODE_PRIVATE)
         category =
-            sharedPref.getString("category", "Wybierz kategorię...") ?: "Wybierz kategorię..."
+            sharedPref.getString("category", "Wybierz kategorię") ?: "Wybierz kategorię"
         sorting =
-            sharedPref.getString("sorting", "Wybierz sortowanie...") ?: "Wybierz sortowanie..."
+            sharedPref.getString("sorting", "Wybierz sortowanie") ?: "Wybierz sortowanie"
         query = sharedPref.getString("query", "") ?: ""
         showDoneTasks = sharedPref.getBoolean("showDoneTasks", false)
         showDoneTasksFilter = sharedPref.getBoolean("showDoneTasksFilter", false)
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             if (!alarmManager.canScheduleExactAlarms()) {
                 AlertDialog.Builder(this)
                     .setTitle("Wymagane uprawnienie")
-                    .setMessage("Aby powiadomienia o zadaniach działały poprawnie, aplikacja potrzebuje zgody na planowanie dokładnych alarmów. Zostaniesz teraz przeniesiony do ustawień, aby ją włączyć.")
+                    .setMessage("Aby powiadomienia działały poprawnie, aplikacja potrzebuje zgody na planowanie dokładnych alarmów.")
                     .setPositiveButton("Przejdź do ustawień") { _, _ ->
                         val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
                         startActivity(intent)
@@ -86,16 +86,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkNotificationPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
-                    100
-                )
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
             }
         }
     }
@@ -122,10 +114,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadTasks() {
-
         tasks = dbManager.getTasks(
             sequence = if (query.isBlank()) null else query,
-            category = if (category == "Wybierz kategorię" || category == "Wybierz kategorię...") null else category,
+            category = if (category == "Wybierz kategorię") null else category,
             sorted = sorting == "Najwcześniejsze" || sorting == "Najpóźniejsze",
             showDone = showDoneTasks
         )

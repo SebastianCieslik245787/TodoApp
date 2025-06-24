@@ -17,20 +17,14 @@ class NotificationReceiver : BroadcastReceiver() {
         val taskId = intent.getIntExtra("TASK_ID", -1)
         val taskTitle = intent.getStringExtra("TASK_TITLE") ?: "Nadchodzące zadanie"
 
-        if (taskId != -1) {
-            showNotification(context, taskId, taskTitle)
-        }
+        if (taskId != -1) showNotification(context, taskId, taskTitle)
     }
 
     private fun showNotification(context: Context, taskId: Int, title: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "task_channel"
 
-        val channel = NotificationChannel(
-            channelId,
-            "Powiadomienia o Zadaniach",
-            NotificationManager.IMPORTANCE_HIGH
-        )
+        val channel = NotificationChannel(channelId, "Powiadomienia o Zadaniach", NotificationManager.IMPORTANCE_HIGH)
         notificationManager.createNotificationChannel(channel)
 
         val showTaskIntent = Intent(context, ShowTask::class.java).apply {
@@ -39,16 +33,9 @@ class NotificationReceiver : BroadcastReceiver() {
 
 
         val sharedPref = context.getSharedPreferences("task_prefs", Context.MODE_PRIVATE)
-        sharedPref.edit {
-            putInt("selected_task_id", taskId)
-        }
+        sharedPref.edit { putInt("selected_task_id", taskId) }
 
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            taskId,
-            showTaskIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent = PendingIntent.getActivity(context, taskId, showTaskIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
